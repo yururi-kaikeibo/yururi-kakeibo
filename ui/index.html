@@ -1,4 +1,4 @@
-  <!doctype html>
+<!doctype html>
 <html lang="ja">
 <head>
 <meta charset="utf-8" />
@@ -2344,12 +2344,7 @@ body{
     <!-- ★ 電卓（クイック加算 + 数字キーパッド）を先に置く ★ -->
     <!-- クイック加算（よく使う金額をワンタップで追加）-->
     <div class="quick-amts" style="display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; width: 100% !important; overflow: visible !important; margin-top: 10px !important;">
-      <button type="button" onclick="quickAdd(100)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+100</button>
-      <button type="button" onclick="quickAdd(500)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+500</button>
-      <button type="button" onclick="quickAdd(1000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1,000</button>
-      <button type="button" onclick="quickAdd(5000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+5,000</button>
-      <button type="button" onclick="quickAdd(10000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1万</button>
-      <button type="button" onclick="quickAdd(100000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+10万</button>
+      <!-- ボタンはJavaScriptで生成 -->
     </div>
 
     <!-- 数字キーパッド（キーボードを呼び出さず即入力できる）-->
@@ -2430,12 +2425,7 @@ body{
         <button type="button" class="btn ghost" style="height:44px; white-space:nowrap;" onclick="closeSavingsCalculator()">閉じる</button>
       </div>
       <div class="quick-amts">
-        <button type="button" onclick="savingsQuickAdd(100)">+100</button>
-        <button type="button" onclick="savingsQuickAdd(500)">+500</button>
-        <button type="button" onclick="savingsQuickAdd(1000)">+1,000</button>
-        <button type="button" onclick="savingsQuickAdd(5000)">+5,000</button>
-        <button type="button" onclick="savingsQuickAdd(10000)">+1万</button>
-        <button type="button" onclick="savingsQuickAdd(100000)">+10万</button>
+        <!-- ボタンはJavaScriptで生成 -->
       </div>
       <div class="keypad">
         <button type="button" onclick="savingsKeyPress('1')">1</button>
@@ -3366,6 +3356,7 @@ function openSavingsCalculator(input){
   const panel = document.getElementById("savingsCalcPanel");
   if(panel){
     panel.style.display = "block";
+    renderSavingsQuickButtons();  // 金額クイックボタンを生成
     setTimeout(()=> panel.scrollIntoView({behavior:"smooth", block:"nearest"}), 80);
   }
 }
@@ -5233,6 +5224,31 @@ function flash(msg){
 }
 
 /* ========== 起動 ========== */
+function renderQuickButtons(){
+  const container = document.querySelector('#page-input .quick-amts');
+  if(!container) return;
+  container.innerHTML = `
+    <button type="button" onclick="quickAdd(100)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+100</button>
+    <button type="button" onclick="quickAdd(500)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+500</button>
+    <button type="button" onclick="quickAdd(1000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1,000</button>
+    <button type="button" onclick="quickAdd(5000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+5,000</button>
+    <button type="button" onclick="quickAdd(10000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1万</button>
+    <button type="button" onclick="quickAdd(100000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+10万</button>
+  `;
+}
+function renderSavingsQuickButtons(){
+  const container = document.querySelector('#savingsCalcPanel .quick-amts');
+  if(!container) return;
+  container.innerHTML = `
+    <button type="button" onclick="savingsQuickAdd(100)">+100</button>
+    <button type="button" onclick="savingsQuickAdd(500)">+500</button>
+    <button type="button" onclick="savingsQuickAdd(1000)">+1,000</button>
+    <button type="button" onclick="savingsQuickAdd(5000)">+5,000</button>
+    <button type="button" onclick="savingsQuickAdd(10000)">+1万</button>
+    <button type="button" onclick="savingsQuickAdd(100000)">+10万</button>
+  `;
+}
+
 (function init(){
   // 日付の初期値を今日
   document.getElementById("txDate").value = todayStr();
@@ -5244,6 +5260,7 @@ function flash(msg){
   applyAppName();
   renderChips();
   renderIncomeChips();        // 収入の種類チップも初期化
+  renderQuickButtons();       // 金額クイックボタンを生成
   updateAmountDisplay();      // 金額表示の初期化（プレースホルダー状態）
   attachAmountDoubleTap();    // 金額エリアのダブルタップで即記録するハンドラを装着
   go("top");
