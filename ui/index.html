@@ -1,4 +1,4 @@
-    <!doctype html>
+<!doctype html>
 <html lang="ja">
 <head>
 <meta charset="utf-8" />
@@ -595,6 +595,8 @@ textarea{min-height:80px; resize:vertical}
   -webkit-tap-highlight-color: rgba(234,145,166,.18);
   touch-action: manipulation;
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  box-sizing: border-box;
+  min-width: 0;
 }
 .amount-display:hover{ border-color:#f4c5cf; box-shadow:0 4px 12px rgba(234,145,166,.12); }
 .amount-display:active{ transform: scale(.985); }
@@ -638,6 +640,8 @@ textarea{min-height:80px; resize:vertical}
   font-size: 26px; font-weight:700; letter-spacing:.02em;
   color: var(--ink); font-variant-numeric: tabular-nums;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width: calc(100vw - 96px);
+  box-sizing: border-box;
+  min-width: 0;
 }
 .amount-display .num.placeholder{color:#d4bbb6}
 
@@ -663,6 +667,8 @@ textarea{min-height:80px; resize:vertical}
   gap: 8px !important;
   width: 100% !important;
   overflow: visible !important;
+  margin-top: 10px !important;
+  max-width: 100% !important;
 }
 
 .quick-amts button {
@@ -671,6 +677,9 @@ textarea{min-height:80px; resize:vertical}
   white-space: nowrap !important;
   font-size: 13px !important;
   padding: 10px 6px !important;
+  min-height: 46px !important;
+  flex-shrink: 0 !important;
+  flex-basis: auto !important;
 }
 
 /* ===== カスタム数字キーパッド（修正3：コンパクト化）===== */
@@ -709,10 +718,14 @@ textarea{min-height:80px; resize:vertical}
 }
 .savings-calc-panel .amount-display{
   width:100%; padding:12px 14px;
+  box-sizing: border-box;
+  min-width: 0;
 }
 .savings-calc-panel .amount-display .num{
   max-width: calc(100vw - 120px);
   font-size: clamp(22px, 5vw, 28px);
+  box-sizing: border-box;
+  min-width: 0;
 }
 #page-savings input.calc-active{
   border-color: var(--pink-deep);
@@ -2308,13 +2321,13 @@ body{
 
     <!-- ★ 電卓（クイック加算 + 数字キーパッド）を先に置く ★ -->
     <!-- クイック加算（よく使う金額をワンタップで追加）-->
-    <div class="quick-amts">
-      <button type="button" onclick="quickAdd(100)">+100</button>
-      <button type="button" onclick="quickAdd(500)">+500</button>
-      <button type="button" onclick="quickAdd(1000)">+1,000</button>
-      <button type="button" onclick="quickAdd(5000)">+5,000</button>
-      <button type="button" onclick="quickAdd(10000)">+1万</button>
-      <button type="button" onclick="quickAdd(100000)">+10万</button>
+    <div class="quick-amts" style="display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; width: 100% !important; overflow: visible !important; margin-top: 10px !important;">
+      <button type="button" onclick="quickAdd(100)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+100</button>
+      <button type="button" onclick="quickAdd(500)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+500</button>
+      <button type="button" onclick="quickAdd(1000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1,000</button>
+      <button type="button" onclick="quickAdd(5000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+5,000</button>
+      <button type="button" onclick="quickAdd(10000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1万</button>
+      <button type="button" onclick="quickAdd(100000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+10万</button>
     </div>
 
     <!-- 数字キーパッド（キーボードを呼び出さず即入力できる）-->
