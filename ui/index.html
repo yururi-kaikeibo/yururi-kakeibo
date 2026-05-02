@@ -727,6 +727,27 @@ textarea{min-height:80px; resize:vertical}
   box-sizing: border-box;
   min-width: 0;
 }
+/* 貯金ページの電卓ボタンを3列×2段に固定 */
+.savings-calc-panel .quick-amts{
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+  margin-top: 10px !important;
+  box-sizing: border-box !important;
+}
+.savings-calc-panel .quick-amts button{
+  width: 100% !important;
+  min-width: 0 !important;
+  white-space: nowrap !important;
+  font-size: 13px !important;
+  padding: 10px 6px !important;
+  min-height: 46px !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+}
 #page-savings input.calc-active{
   border-color: var(--pink-deep);
   box-shadow: 0 0 0 3px rgba(234,145,166,.14);
@@ -2313,9 +2334,10 @@ body{
     ">
       <div style="font-size:11px; color:var(--ink-soft); margin-bottom:2px;">現在の入力金額</div>
       <div id="bannerAmount" class="placeholder" style="
-        font-size:28px; font-weight:800; color:var(--ink);
+        font-size:clamp(20px,5vw,28px); font-weight:800; color:var(--ink);
         font-variant-numeric:tabular-nums;
         white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        max-width:100%; box-sizing:border-box; min-width:0;
       ">0円</div>
     </div>
 
