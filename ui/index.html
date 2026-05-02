@@ -637,13 +637,13 @@ textarea{min-height:80px; resize:vertical}
 .amount-display .num{
   font-size: 26px; font-weight:700; letter-spacing:.02em;
   color: var(--ink); font-variant-numeric: tabular-nums;
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width: 72vw;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width: calc(100vw - 96px);
 }
 .amount-display .num.placeholder{color:#d4bbb6}
 
 /* ===== クイック加算ボタン ===== */
 .quick-amts{
-  display:grid; grid-template-columns: repeat(3, 1fr); gap:6px;
+  display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:8px;
   margin-top:10px;
 }
 .quick-amts button{
@@ -651,12 +651,14 @@ textarea{min-height:80px; resize:vertical}
   color: var(--ink); border-radius:12px;
   padding:10px 0; font-size:12px; font-weight:600;
   cursor:pointer; font-family:inherit;
+  min-height:46px;
+  width:100%;
 }
 .quick-amts button:active{ background: var(--beige) }
 
 /* ===== カスタム数字キーパッド（修正3：コンパクト化）===== */
 .keypad{
-  display:grid; grid-template-columns: repeat(3, 1fr); gap:6px;
+  display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:8px;
   margin-top:8px;
 }
 .keypad button{
@@ -665,12 +667,40 @@ textarea{min-height:80px; resize:vertical}
   padding:11px 0; font-size:20px; font-weight:600;
   cursor:pointer; font-family:inherit;
   font-variant-numeric: tabular-nums;
-  min-height:44px;
+  min-height:48px;
   transition: transform .08s ease;
+  width:100%;
 }
 .keypad button:active{ transform: scale(.95); background: var(--beige) }
 .keypad button.bs{ color: var(--accent); font-size:18px }
 .keypad button.cl{ color: var(--ink-soft); font-size:13px }
+
+/* ===== 貯金ページの共通電卓パネル ===== */
+.savings-calc-panel{
+  position:sticky;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  z-index:25;
+  margin-top:14px;
+  padding:16px;
+  background: #fff8fa;
+  border: 1px solid #f8d7dd;
+  border-radius: 20px;
+}
+.savings-calc-panel .calc-panel-head{
+  display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
+  margin-bottom:14px;
+}
+.savings-calc-panel .amount-display{
+  width:100%; padding:12px 14px;
+}
+.savings-calc-panel .amount-display .num{
+  max-width: calc(100vw - 120px);
+  font-size: clamp(22px, 5vw, 28px);
+}
+#page-savings input.calc-active{
+  border-color: var(--pink-deep);
+  box-shadow: 0 0 0 3px rgba(234,145,166,.14);
+}
 
 /* ===== ダッシュボード：収入／支出／収支を1画面に ===== */
 .dash-flow{
@@ -2335,15 +2365,39 @@ body{
 
     <label>目標貯金額（円）</label>
     <input type="number" id="savGoal" inputmode="numeric" min="0" />
-    
-    <!-- ★ 修正6：貯金目標に電卓を追加 -->
-    <div style="margin-top:8px; padding:10px 12px; background:#fff8fa; border-radius:12px; border:1px dashed #f4b0be;">
-      <div style="font-size:11px; color:var(--ink-soft); margin-bottom:6px; font-weight:600;">クイック加算</div>
-      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:4px;">
-        <button type="button" style="border:1.5px solid #f4b0be; background:#fff; color:var(--ink); border-radius:10px; padding:8px 4px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;" onclick="document.getElementById('savGoal').value = (Number(document.getElementById('savGoal').value)||0) + 10000; document.getElementById('savGoal').focus();">+1万</button>
-        <button type="button" style="border:1.5px solid #f4b0be; background:#fff; color:var(--ink); border-radius:10px; padding:8px 4px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;" onclick="document.getElementById('savGoal').value = (Number(document.getElementById('savGoal').value)||0) + 50000; document.getElementById('savGoal').focus();">+5万</button>
-        <button type="button" style="border:1.5px solid #f4b0be; background:#fff; color:var(--ink); border-radius:10px; padding:8px 4px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;" onclick="document.getElementById('savGoal').value = (Number(document.getElementById('savGoal').value)||0) + 100000; document.getElementById('savGoal').focus();">+10万</button>
-        <button type="button" style="border:1.5px solid #f4b0be; background:#fff; color:#c0656b; border-radius:10px; padding:8px 4px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;" onclick="document.getElementById('savGoal').value = ''; document.getElementById('savGoal').focus();">クリア</button>
+
+    <div id="savingsCalcPanel" class="savings-calc-panel" style="display:none;">
+      <div class="calc-panel-head">
+        <div>
+          <div style="font-size:12px; color:var(--ink-soft); margin-bottom:4px; font-weight:600;">入力中の金額</div>
+          <div class="amount-display">
+            <span class="yen">¥</span>
+            <span id="savingsCalcAmount" class="num placeholder">0</span>
+          </div>
+        </div>
+        <button type="button" class="btn ghost" style="height:44px; white-space:nowrap;" onclick="closeSavingsCalculator()">閉じる</button>
+      </div>
+      <div class="quick-amts">
+        <button type="button" onclick="savingsQuickAdd(100)">+100</button>
+        <button type="button" onclick="savingsQuickAdd(500)">+500</button>
+        <button type="button" onclick="savingsQuickAdd(1000)">+1,000</button>
+        <button type="button" onclick="savingsQuickAdd(5000)">+5,000</button>
+        <button type="button" onclick="savingsQuickAdd(10000)">+1万</button>
+        <button type="button" onclick="savingsQuickAdd(100000)">+10万</button>
+      </div>
+      <div class="keypad">
+        <button type="button" onclick="savingsKeyPress('1')">1</button>
+        <button type="button" onclick="savingsKeyPress('2')">2</button>
+        <button type="button" onclick="savingsKeyPress('3')">3</button>
+        <button type="button" onclick="savingsKeyPress('4')">4</button>
+        <button type="button" onclick="savingsKeyPress('5')">5</button>
+        <button type="button" onclick="savingsKeyPress('6')">6</button>
+        <button type="button" onclick="savingsKeyPress('7')">7</button>
+        <button type="button" onclick="savingsKeyPress('8')">8</button>
+        <button type="button" onclick="savingsKeyPress('9')">9</button>
+        <button type="button" class="cl" onclick="savingsKeyPress('C')">クリア</button>
+        <button type="button" onclick="savingsKeyPress('0')">0</button>
+        <button type="button" class="bs" onclick="savingsKeyPress('BS')">⌫</button>
       </div>
     </div>
 
@@ -2948,6 +3002,7 @@ function go(name){
   });
   window.scrollTo({top:0, behavior:"instant"});
   // ページ表示時にデータ更新
+  if(name!="savings") closeSavingsCalculator();
   if(name==="top")     renderDashboard();   // ダッシュボード一式
   if(name==="report")  renderReport();
   if(name==="graph")   renderCharts();
@@ -3229,6 +3284,71 @@ function quickAdd(v){
   amountStr = String(Math.min(next, 999999999));
   updateAmountDisplay();
   if(typeof resetAmtPrime === "function") resetAmtPrime();
+}
+
+let savingsCalcAmount = "";
+let savingsCalcTarget = null;
+function setupSavingsCalculatorInputs(){
+  ["savBalance","savThisMonth","savGoal"].forEach(id=>{
+    const input = document.getElementById(id);
+    if(!input || input.dataset.calcAttached) return;
+    const open = ()=> openSavingsCalculator(input);
+    input.addEventListener("focus", open);
+    input.addEventListener("click", open);
+    input.addEventListener("input", ()=>{
+      if(savingsCalcTarget === input){
+        savingsCalcAmount = input.value ? String(Math.min(Number(input.value)||0, 999999999)) : "";
+        updateSavingsCalcDisplay();
+      }
+    });
+    input.dataset.calcAttached = "1";
+  });
+}
+function openSavingsCalculator(input){
+  savingsCalcTarget = input;
+  savingsCalcAmount = input.value ? String(Math.min(Number(input.value)||0, 999999999)) : "";
+  updateSavingsCalcDisplay();
+  document.querySelectorAll("#page-savings .savings-input-card input").forEach(el=>{
+    el.classList.toggle("calc-active", el===input);
+  });
+  const panel = document.getElementById("savingsCalcPanel");
+  if(panel){
+    panel.style.display = "block";
+    setTimeout(()=> panel.scrollIntoView({behavior:"smooth", block:"nearest"}), 80);
+  }
+}
+function closeSavingsCalculator(){
+  const panel = document.getElementById("savingsCalcPanel");
+  if(panel) panel.style.display = "none";
+  document.querySelectorAll("#page-savings .savings-input-card input").forEach(el=> el.classList.remove("calc-active"));
+  savingsCalcTarget = null;
+  savingsCalcAmount = "";
+}
+function updateSavingsCalcDisplay(){
+  const el = document.getElementById("savingsCalcAmount");
+  const n = Number(savingsCalcAmount) || 0;
+  if(el){
+    el.textContent = savingsCalcAmount === "" ? "0円" : n.toLocaleString("ja-JP") + "円";
+    el.classList.toggle("placeholder", savingsCalcAmount === "");
+  }
+  if(savingsCalcTarget){
+    savingsCalcTarget.value = savingsCalcAmount === "" ? "" : String(n);
+  }
+}
+function savingsKeyPress(k){
+  if(k === "C"){ savingsCalcAmount = ""; }
+  else if(k === "BS"){ savingsCalcAmount = savingsCalcAmount.slice(0, -1); }
+  else {
+    if(savingsCalcAmount === "0") savingsCalcAmount = "";
+    savingsCalcAmount += k;
+  }
+  if(savingsCalcAmount.length > 9) savingsCalcAmount = savingsCalcAmount.slice(0, 9);
+  updateSavingsCalcDisplay();
+}
+function savingsQuickAdd(v){
+  const next = (Number(savingsCalcAmount) || 0) + v;
+  savingsCalcAmount = String(Math.min(next, 999999999));
+  updateSavingsCalcDisplay();
 }
 
 function todayStr(){
@@ -3557,6 +3677,7 @@ function renderSavings(){
   document.getElementById("savGoal").value      = DB.savings.goal || DB.settings.goal || "";
   document.getElementById("savMemo").value      = DB.savings.memo || "";
   updateSavingsView();
+  setupSavingsCalculatorInputs();
   renderAssets();
 }
 
