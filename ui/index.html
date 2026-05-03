@@ -2344,7 +2344,12 @@ body{
     <!-- ★ 電卓（クイック加算 + 数字キーパッド）を先に置く ★ -->
     <!-- クイック加算（よく使う金額をワンタップで追加）-->
     <div class="quick-amts" style="display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; width: 100% !important; overflow: visible !important; margin-top: 10px !important;">
-      <!-- ボタンはJavaScriptで生成 -->
+      <button type="button" onclick="quickAdd(100)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+100</button>
+      <button type="button" onclick="quickAdd(500)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+500</button>
+      <button type="button" onclick="quickAdd(1000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1,000</button>
+      <button type="button" onclick="quickAdd(5000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+5,000</button>
+      <button type="button" onclick="quickAdd(10000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1万</button>
+      <button type="button" onclick="quickAdd(100000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+10万</button>
     </div>
 
     <!-- 数字キーパッド（キーボードを呼び出さず即入力できる）-->
@@ -2405,13 +2410,13 @@ body{
   <div class="card savings-input-card">
     <h2>貯金残高と目標</h2>
     <label>現在の貯金残高（円）</label>
-    <input type="number" id="savBalance" inputmode="numeric" min="0" />
+    <input type="number" id="savBalance" inputmode="numeric" min="0" onclick="openSavingsCalculator(this)" />
 
     <label>今月の貯金額（円）</label>
-    <input type="number" id="savThisMonth" inputmode="numeric" min="0" />
+    <input type="number" id="savThisMonth" inputmode="numeric" min="0" onclick="openSavingsCalculator(this)" />
 
     <label>目標貯金額（円）</label>
-    <input type="number" id="savGoal" inputmode="numeric" min="0" />
+    <input type="number" id="savGoal" inputmode="numeric" min="0" onclick="openSavingsCalculator(this)" />
 
     <div id="savingsCalcPanel" class="savings-calc-panel" style="display:none;">
       <div class="calc-panel-head">
@@ -2424,8 +2429,13 @@ body{
         </div>
         <button type="button" class="btn ghost" style="height:44px; white-space:nowrap;" onclick="closeSavingsCalculator()">閉じる</button>
       </div>
-      <div class="quick-amts">
-        <!-- ボタンはJavaScriptで生成 -->
+      <div class="quick-amts" style="display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; width: 100% !important; max-width: 100% !important; overflow: visible !important; margin-top: 10px !important; box-sizing: border-box !important;">
+        <button type="button" onclick="savingsQuickAdd(100)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+100</button>
+        <button type="button" onclick="savingsQuickAdd(500)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+500</button>
+        <button type="button" onclick="savingsQuickAdd(1000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1,000</button>
+        <button type="button" onclick="savingsQuickAdd(5000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+5,000</button>
+        <button type="button" onclick="savingsQuickAdd(10000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1万</button>
+        <button type="button" onclick="savingsQuickAdd(100000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+10万</button>
       </div>
       <div class="keypad">
         <button type="button" onclick="savingsKeyPress('1')">1</button>
@@ -2731,12 +2741,13 @@ body{
       <span class="yen">円／月</span>
     </div>
 
-    <div class="quick-amts" style="grid-template-columns: repeat(5, 1fr)">
-      <button type="button" onclick="budQuickAdd(1000)">+1,000</button>
-      <button type="button" onclick="budQuickAdd(5000)">+5,000</button>
-      <button type="button" onclick="budQuickAdd(10000)">+1万</button>
-      <button type="button" onclick="budQuickAdd(30000)">+3万</button>
-      <button type="button" onclick="budQuickAdd(50000)">+5万</button>
+    <div class="quick-amts" style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; max-width: 100%; box-sizing: border-box;">
+      <button type="button" onclick="budQuickAdd(1000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1,000</button>
+      <button type="button" onclick="budQuickAdd(5000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+5,000</button>
+      <button type="button" onclick="budQuickAdd(10000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1万</button>
+      <button type="button" onclick="budQuickAdd(30000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+3万</button>
+      <button type="button" onclick="budQuickAdd(50000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+5万</button>
+      <button type="button" onclick="budQuickAdd(100000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+10万</button>
     </div>
 
     <div class="keypad">
@@ -3356,7 +3367,6 @@ function openSavingsCalculator(input){
   const panel = document.getElementById("savingsCalcPanel");
   if(panel){
     panel.style.display = "block";
-    renderSavingsQuickButtons();  // 金額クイックボタンを生成
     setTimeout(()=> panel.scrollIntoView({behavior:"smooth", block:"nearest"}), 80);
   }
 }
@@ -5083,7 +5093,7 @@ function renderCharts(){
     DB.txs.filter(t=>t.kind==="expense" && t.date.startsWith(m))
           .reduce((a,t)=>a+Number(t.amount||0),0)
   );
-  charts.me = mkBar("chartMonthExp", months, monthExp, "#F47B9E");    
+  charts.me = mkBar("chartMonthExp", months, monthExp, "#F47B9E");
 
   // 右：月別 貯金額（過去6か月） — 履歴がない場合は今月の値だけ反映（寒色系：ティールグリーン）
   const monthSav = months.map((m,i)=> i===months.length-1 ? Number(DB.savings.thisMonth||0) : 0);
@@ -5224,31 +5234,6 @@ function flash(msg){
 }
 
 /* ========== 起動 ========== */
-function renderQuickButtons(){
-  const container = document.querySelector('#page-input .quick-amts');
-  if(!container) return;
-  container.innerHTML = `
-    <button type="button" onclick="quickAdd(100)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+100</button>
-    <button type="button" onclick="quickAdd(500)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+500</button>
-    <button type="button" onclick="quickAdd(1000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1,000</button>
-    <button type="button" onclick="quickAdd(5000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+5,000</button>
-    <button type="button" onclick="quickAdd(10000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1万</button>
-    <button type="button" onclick="quickAdd(100000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+10万</button>
-  `;
-}
-function renderSavingsQuickButtons(){
-  const container = document.querySelector('#savingsCalcPanel .quick-amts');
-  if(!container) return;
-  container.innerHTML = `
-    <button type="button" onclick="savingsQuickAdd(100)">+100</button>
-    <button type="button" onclick="savingsQuickAdd(500)">+500</button>
-    <button type="button" onclick="savingsQuickAdd(1000)">+1,000</button>
-    <button type="button" onclick="savingsQuickAdd(5000)">+5,000</button>
-    <button type="button" onclick="savingsQuickAdd(10000)">+1万</button>
-    <button type="button" onclick="savingsQuickAdd(100000)">+10万</button>
-  `;
-}
-
 (function init(){
   // 日付の初期値を今日
   document.getElementById("txDate").value = todayStr();
@@ -5260,7 +5245,6 @@ function renderSavingsQuickButtons(){
   applyAppName();
   renderChips();
   renderIncomeChips();        // 収入の種類チップも初期化
-  renderQuickButtons();       // 金額クイックボタンを生成
   updateAmountDisplay();      // 金額表示の初期化（プレースホルダー状態）
   attachAmountDoubleTap();    // 金額エリアのダブルタップで即記録するハンドラを装着
   go("top");
