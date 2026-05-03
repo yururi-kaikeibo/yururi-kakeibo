@@ -3725,10 +3725,14 @@ function escapeHtml(s){return s.replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",
 
 /* ========== 貯金・資産ページ ========== */
 function renderSavings(){
-  document.getElementById("savBalance").value   = DB.savings.balance || "";
-  document.getElementById("savThisMonth").value = DB.savings.thisMonth || "";
-  document.getElementById("savGoal").value      = DB.savings.goal || DB.settings.goal || "";
-  document.getElementById("savMemo").value      = DB.savings.memo || "";
+  const savBalance = document.getElementById("savBalance");
+  if(savBalance) savBalance.value = DB.savings.balance || "";
+  const savThisMonth = document.getElementById("savThisMonth");
+  if(savThisMonth) savThisMonth.value = DB.savings.thisMonth || "";
+  const savGoal = document.getElementById("savGoal");
+  if(savGoal) savGoal.value = DB.savings.goal || DB.settings.goal || "";
+  const savMemo = document.getElementById("savMemo");
+  if(savMemo) savMemo.value = DB.savings.memo || "";
   updateSavingsView();
   setupSavingsCalculatorInputs();
   renderAssets();
@@ -3835,11 +3839,16 @@ function saveSavings(){
 function updateSavingsView(){
   const s = DB.savings;
   const remain = Math.max(0, (s.goal||0) - (s.balance||0));
-  document.getElementById("savRemain").textContent = remain>0 ? yen(remain) : "達成しています♡";
-  document.getElementById("savBalShow").textContent  = yen(s.balance||0);
-  document.getElementById("savThisShow").textContent = "+" + yen(s.thisMonth||0);
-  document.getElementById("savGoalShow").textContent = yen(s.goal||0);
-  document.getElementById("savMsg").textContent =
+  const savRemain = document.getElementById("savRemain");
+  if(savRemain) savRemain.textContent = remain>0 ? yen(remain) : "達成しています♡";
+  const savBalShow = document.getElementById("savBalShow");
+  if(savBalShow) savBalShow.textContent = yen(s.balance||0);
+  const savThisShow = document.getElementById("savThisShow");
+  if(savThisShow) savThisShow.textContent = "+" + yen(s.thisMonth||0);
+  const savGoalShow = document.getElementById("savGoalShow");
+  if(savGoalShow) savGoalShow.textContent = yen(s.goal||0);
+  const savMsg = document.getElementById("savMsg");
+  if(savMsg) savMsg.textContent =
     !s.goal ? "目標を入力すると、毎月の励みになります。" :
     remain>0 ? "あせらず、少しずつで大丈夫。" :
                "おめでとうございます！次の目標もゆっくり考えていきましょう。";
@@ -3866,17 +3875,25 @@ function renderReport(){
 
   const big = document.getElementById("repBalanceBig");
   const msg = document.getElementById("repBalanceMsg");
-  big.textContent = (balance>=0?"+":"−") + yen(Math.abs(balance));
-  big.classList.toggle("good", balance>=0);
-  big.classList.toggle("warn", balance<0);
-  msg.textContent = balance>=0
-    ? `今月は ${yen(balance)} の黒字です。よくがんばりました♡`
-    : `今月は ${yen(Math.abs(balance))} の赤字です。まずは見える化できたことが第一歩です。`;
+  if(big){
+    big.textContent = (balance>=0?"+":"−") + yen(Math.abs(balance));
+    big.classList.toggle("good", balance>=0);
+    big.classList.toggle("warn", balance<0);
+  }
+  if(msg){
+    msg.textContent = balance>=0
+      ? `今月は ${yen(balance)} の黒字です。よくがんばりました♡`
+      : `今月は ${yen(Math.abs(balance))} の赤字です。まずは見える化できたことが第一歩です。`;
+  }
 
-  document.getElementById("repIncome").textContent  = "+" + yen(income);
-  document.getElementById("repExpense").textContent = "−" + yen(expense);
-  document.getElementById("repSav").textContent     = yen(DB.savings.thisMonth||0);
-  document.getElementById("repBal").textContent     = yen(DB.savings.balance||0);
+  const repIncome = document.getElementById("repIncome");
+  if(repIncome) repIncome.textContent  = "+" + yen(income);
+  const repExpense = document.getElementById("repExpense");
+  if(repExpense) repExpense.textContent = "−" + yen(expense);
+  const repSav = document.getElementById("repSav");
+  if(repSav) repSav.textContent     = yen(DB.savings.thisMonth||0);
+  const repBal = document.getElementById("repBal");
+  if(repBal) repBal.textContent     = yen(DB.savings.balance||0);
 
   // カテゴリー別（1行表示：カテゴリー名 / 金額 / 割合 / 前月比）
   const catSum = {};
