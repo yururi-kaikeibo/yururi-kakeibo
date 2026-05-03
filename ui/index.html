@@ -5083,7 +5083,7 @@ function renderCharts(){
     DB.txs.filter(t=>t.kind==="expense" && t.date.startsWith(m))
           .reduce((a,t)=>a+Number(t.amount||0),0)
   );
-  charts.me = mkBar("chartMonthExp", months, monthExp, "#F47B9E");
+  charts.me = mkBar("chartMonthExp", months, monthExp, "#F47B9E");    
 
   // 右：月別 貯金額（過去6か月） — 履歴がない場合は今月の値だけ反映（寒色系：ティールグリーン）
   const monthSav = months.map((m,i)=> i===months.length-1 ? Number(DB.savings.thisMonth||0) : 0);
