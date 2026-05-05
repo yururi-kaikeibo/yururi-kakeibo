@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8" />
+<base href="/yururi-kakeibo/" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="theme-color" content="#fff7f3" />
 <title>ぱぱっと家計簿</title>
@@ -3945,43 +3946,45 @@ function renderReport(){
   const totalExp = Object.values(catSum).reduce((a,b)=>a+b,0);
   const catList = document.getElementById("repCatList");
   if(Object.keys(catSum).length===0){
-    catList.innerHTML = '<div class="muted">記録があるとここに出ます。</div>';
+    if(catList) catList.innerHTML = '<div class="muted">記録があるとここに出ます。</div>';
   }else{
-    catList.className = "rep-cat-list";
-    catList.innerHTML = "";
-    // ヘッダー行
-    const head = document.createElement("div");
-    head.className = "rep-cat-row rep-cat-head";
-    head.innerHTML = `
-      <span class="rc-name">カテゴリー</span>
-      <span class="rc-amount">金額</span>
-      <span class="rc-pct">割合</span>
-      <span class="rc-diff">前月比</span>`;
-    catList.appendChild(head);
-    Object.entries(catSum).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{
-      const [icon,bg] = (typeof getCatIcon === "function") ? getCatIcon(k||"未分類") : ["📌","#fde2e7"];
-      const pct = totalExp ? Math.round(v/totalExp*100) : 0;
-      const prev = prevSum[k] || 0;
-      let diffText = "—", diffCls = "neutral";
-      if(prev > 0){
-        const diff = v - prev;
-        const dpct = Math.round(diff/prev*100);
-        if(diff === 0){ diffText = "±0"; diffCls = "neutral"; }
-        else if(diff > 0){ diffText = `+${yen(diff)} (+${dpct}%)`; diffCls = "up"; }
-        else { diffText = `−${yen(Math.abs(diff))} (${dpct}%)`; diffCls = "down"; }
-      }else if(v > 0){
-        diffText = "新規";
-        diffCls = "new";
-      }
-      const r = document.createElement("div");
-      r.className = "rep-cat-row";
-      r.innerHTML = `
-        <span class="rc-name"><span class="rc-ic" style="background:${bg}">${icon}</span>${escapeHtml(k||"未分類")}</span>
-        <span class="rc-amount">${yen(v)}</span>
-        <span class="rc-pct">${pct}%</span>
-        <span class="rc-diff ${diffCls}">${diffText}</span>`;
-      catList.appendChild(r);
-    });
+    if(catList){
+      catList.className = "rep-cat-list";
+      catList.innerHTML = "";
+      // ヘッダー行
+      const head = document.createElement("div");
+      head.className = "rep-cat-row rep-cat-head";
+      head.innerHTML = `
+        <span class="rc-name">カテゴリー</span>
+        <span class="rc-amount">金額</span>
+        <span class="rc-pct">割合</span>
+        <span class="rc-diff">前月比</span>`;
+      catList.appendChild(head);
+      Object.entries(catSum).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{
+        const [icon,bg] = (typeof getCatIcon === "function") ? getCatIcon(k||"未分類") : ["📌","#fde2e7"];
+        const pct = totalExp ? Math.round(v/totalExp*100) : 0;
+        const prev = prevSum[k] || 0;
+        let diffText = "—", diffCls = "neutral";
+        if(prev > 0){
+          const diff = v - prev;
+          const dpct = Math.round(diff/prev*100);
+          if(diff === 0){ diffText = "±0"; diffCls = "neutral"; }
+          else if(diff > 0){ diffText = `+${yen(diff)} (+${dpct}%)`; diffCls = "up"; }
+          else { diffText = `−${yen(Math.abs(diff))} (${dpct}%)`; diffCls = "down"; }
+        }else if(v > 0){
+          diffText = "新規";
+          diffCls = "new";
+        }
+        const r = document.createElement("div");
+        r.className = "rep-cat-row";
+        r.innerHTML = `
+          <span class="rc-name"><span class="rc-ic" style="background:${bg}">${icon}</span>${escapeHtml(k||"未分類")}</span>
+          <span class="rc-amount">${yen(v)}</span>
+          <span class="rc-pct">${pct}%</span>
+          <span class="rc-diff ${diffCls}">${diffText}</span>`;
+        catList.appendChild(r);
+      });
+    }
   }
   // 支払い方法別（現金・クレカ・電子マネー・QR決済 などをアイコン付きで表示）
   const paySum = {};
@@ -3989,23 +3992,27 @@ function renderReport(){
   const payList = document.getElementById("repPayList");
   const totalPay = Object.values(paySum).reduce((a,b)=>a+b,0);
   if(Object.keys(paySum).length===0){
-    payList.className = "muted";
-    payList.innerHTML = '<div class="muted">記録があるとここに出ます。</div>';
+    if(payList){
+      payList.className = "muted";
+      payList.innerHTML = '<div class="muted">記録があるとここに出ます。</div>';
+    }
   }else{
-    payList.className = "rep-pay-list";
-    payList.innerHTML = "";
-    Object.entries(paySum).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{
-      const [icon, bg] = getPayIcon(k||"未指定");
-      const pct = totalPay ? Math.round(v/totalPay*100) : 0;
-      const r = document.createElement("div");
-      r.className = "rep-pay-row";
-      r.innerHTML = `
-        <span class="rp-name"><span class="rp-ic" style="background:${bg}">${icon}</span>${escapeHtml(k||"未指定")}</span>
-        <span class="rp-amount">${yen(v)}</span>
-        <div class="rp-bar"><div class="rp-fill" style="width:${pct}%"></div></div>
-        <span class="rp-pct">${pct}%</span>`;
-      payList.appendChild(r);
-    });
+    if(payList){
+      payList.className = "rep-pay-list";
+      payList.innerHTML = "";
+      Object.entries(paySum).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{
+        const [icon, bg] = getPayIcon(k||"未指定");
+        const pct = totalPay ? Math.round(v/totalPay*100) : 0;
+        const r = document.createElement("div");
+        r.className = "rep-pay-row";
+        r.innerHTML = `
+          <span class="rp-name"><span class="rp-ic" style="background:${bg}">${icon}</span>${escapeHtml(k||"未指定")}</span>
+          <span class="rp-amount">${yen(v)}</span>
+          <div class="rp-bar"><div class="rp-fill" style="width:${pct}%"></div></div>
+          <span class="rp-pct">${pct}%</span>`;
+        payList.appendChild(r);
+      });
+    }
   }
 }
 /* ========== カレンダー（日別収支） ========== */
@@ -4245,10 +4252,13 @@ function renderDashboard(){
   if(elTotal){
     elTotal.textContent = yen(totalAssets());
     const {labels} = assetBreakdown();
-    document.getElementById("dashAssetMsg").textContent =
-      labels.length===0 ? "資産項目を追加すると、内訳が見えます。" :
-      labels.length===1 ? "別の資産項目を加えると、内訳がより見やすくなります。" :
-                          "資産の内訳がきれいに見えています♡";
+    const msgEl = document.getElementById("dashAssetMsg");
+    if(msgEl){
+      msgEl.textContent =
+        labels.length===0 ? "資産項目を追加すると、内訳が見えます。" :
+        labels.length===1 ? "別の資産項目を加えると、内訳がより見やすくなります。" :
+                            "資産の内訳がきれいに見えています♡";
+    }
     renderAssetsChart("chartAssets");
   }
 
@@ -4929,16 +4939,18 @@ function renderWeeklySection(){
   // 旧アドバイス欄（後方互換）
   const advWrap = document.getElementById("weeklyAdvice");
   const messages = generateWeeklyAdvice();
-  advWrap.innerHTML = "";
-  if(messages.length === 0){
-    advWrap.innerHTML = '';
-  }else{
-    messages.forEach(m=>{
-      const d = document.createElement("div");
-      d.className = "advice " + (m.tone||"info");
-      d.innerHTML = `<span class="ic">${m.icon||"💡"}</span>${escapeHtml(m.text)}`;
-      advWrap.appendChild(d);
-    });
+  if(advWrap){
+    advWrap.innerHTML = "";
+    if(messages.length === 0){
+      advWrap.innerHTML = '';
+    }else{
+      messages.forEach(m=>{
+        const d = document.createElement("div");
+        d.className = "advice " + (m.tone||"info");
+        d.innerHTML = `<span class="ic">${m.icon||"💡"}</span>${escapeHtml(m.text)}`;
+        advWrap.appendChild(d);
+      });
+    }
   }
 
   // 棒グラフ：先週 vs 今週のカテゴリー別支出
@@ -5348,12 +5360,14 @@ function flash(msg){
 }
 
 /* ========== 起動 ========== */
-(function init(){
+document.addEventListener("DOMContentLoaded", function init(){
   // 日付の初期値を今日
-  document.getElementById("txDate").value = todayStr();
+  const txDateEl = document.getElementById("txDate");
+  if(txDateEl) txDateEl.value = todayStr();
   // レポートの初期月を今月
   const d = new Date();
-  document.getElementById("reportMonth").value = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+  const reportMonthEl = document.getElementById("reportMonth");
+  if(reportMonthEl) reportMonthEl.value = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
   // 起動時：前回の支払い方法を自動選択しておく（ズボラさん導線）
   selectedPay = DB.lastPay || null;
   applyAppName();
@@ -5362,7 +5376,11 @@ function flash(msg){
   updateAmountDisplay();      // 金額表示の初期化（プレースホルダー状態）
   attachAmountDoubleTap();    // 金額エリアのダブルタップで即記録するハンドラを装着
   go("top");
-})();
+});
+// GitHub PagesなどでDOMContentLoadedが発火しない場合の保険
+window.addEventListener("load", function(){
+  if(document.readyState === "complete" && !document.querySelector(".page.active")) init();
+});
 </script>
 <div style="position:fixed; bottom:0; right:0; font-size:10px; color:#ccc; z-index:100;">v-fix-20260505-final</div>
 </body>
