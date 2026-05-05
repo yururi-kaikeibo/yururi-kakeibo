@@ -1,11 +1,11 @@
-  <!doctype html>
+<!doctype html>
 <html lang="ja">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="theme-color" content="#fff7f3" />
 <title>ぱぱっと家計簿</title>
-<!-- deploy check: ui publish 20260505 -->
+
 <!-- ====== CLAUDE.md governance summary（実装時の自己チェック）======
 [ガバナンス] 機能追加のたび、ターゲット主婦のやさしい体験を最優先。投資・保険・税金の個別判断はしない。
 [セキュリティ] カード番号・暗証番号・口座番号などは一切入力させない。データはこのブラウザのlocalStorageのみ。
@@ -2343,13 +2343,7 @@ body{
 
     <!-- ★ 電卓（クイック加算 + 数字キーパッド）を先に置く ★ -->
     <!-- クイック加算（よく使う金額をワンタップで追加）-->
-    <div class="quick-amts" style="display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; width: 100% !important; overflow: visible !important; margin-top: 10px !important;">
-      <button type="button" onclick="quickAdd(100)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+100</button>
-      <button type="button" onclick="quickAdd(500)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+500</button>
-      <button type="button" onclick="quickAdd(1000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1,000</button>
-      <button type="button" onclick="quickAdd(5000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+5,000</button>
-      <button type="button" onclick="quickAdd(10000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1万</button>
-      <button type="button" onclick="quickAdd(100000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+10万</button>
+    <div id="inputQuickAmts" class="quick-amts" style="display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; width: 100% !important; overflow: visible !important; margin-top: 10px !important;">
     </div>
 
     <!-- 数字キーパッド（キーボードを呼び出さず即入力できる）-->
@@ -2429,13 +2423,7 @@ body{
         </div>
         <button type="button" class="btn ghost" style="height:44px; white-space:nowrap;" onclick="closeSavingsCalculator()">閉じる</button>
       </div>
-      <div class="quick-amts" style="display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; width: 100% !important; max-width: 100% !important; overflow: visible !important; margin-top: 10px !important; box-sizing: border-box !important;">
-        <button type="button" onclick="savingsQuickAdd(100)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+100</button>
-        <button type="button" onclick="savingsQuickAdd(500)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+500</button>
-        <button type="button" onclick="savingsQuickAdd(1000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1,000</button>
-        <button type="button" onclick="savingsQuickAdd(5000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+5,000</button>
-        <button type="button" onclick="savingsQuickAdd(10000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1万</button>
-        <button type="button" onclick="savingsQuickAdd(100000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+10万</button>
+      <div id="savingsQuickAmts" class="quick-amts" style="display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; width: 100% !important; max-width: 100% !important; overflow: visible !important; margin-top: 10px !important; box-sizing: border-box !important;">
       </div>
       <div class="keypad">
         <button type="button" onclick="savingsKeyPress('1')">1</button>
@@ -2607,14 +2595,24 @@ body{
 </section>
 
 
-<!-- ============================ 6. Instagram案内（修正4：紹介カードのみ）============================ -->
+<!-- ============================ 6. Instagram案内 ============================ -->
 <section id="page-ig" class="page">
   <div class="card" style="text-align:center; padding:24px 18px;">
-    <div style="font-size:40px; margin-bottom:10px;">📸</div>
-    <h2 style="font-size:17px; margin-bottom:8px;">ゆるりママのInstagram</h2>
-    <p style="color:var(--ink-soft); font-size:14px; line-height:1.7; margin-bottom:16px;">家計管理・節約・NISAをやさしく発信中。<br>気になる方はチェックしてね♡</p>
+    <div style="font-size:48px; margin-bottom:16px;">📸</div>
+    <h2 style="font-size:18px; margin-bottom:12px; font-weight:700;">Instagramのご案内</h2>
+    <p style="color:var(--ink-soft); font-size:14px; line-height:1.8; margin-bottom:20px;">
+      ゆるりママのInstagramでは、家計管理・節約・NISA・楽天経済圏・貯金の仕組み化について、主婦目線でわかりやすく発信しています。<br><br>
+      このアプリと一緒に使うと、<br>
+      ・家計を見える化する<br>
+      ・ムダづかいに気づく<br>
+      ・貯金の目標を立てる<br>
+      ・将来のお金を少しずつ整える<br>
+      ことができます。<br><br>
+      無理なく、ゆるく、でも着実に。<br>
+      一緒に家計を整えていきましょう。
+    </p>
     <a href="#" class="btn block" style="max-width:260px; margin:0 auto; display:block;" onclick="alert('Instagramリンクをここに設定してください。'); return false;">Instagramを見る</a>
-    <div class="compliance" style="margin-top:14px;">※投資・保険・税金などの最終判断は専門家へご相談ください。</div>
+    <div class="compliance" style="margin-top:16px; font-size:12px; color:var(--ink-soft);">一部の投稿やリンクにはPR・アフィリエイト広告を含む場合があります。</div>
   </div>
 </section>
 
@@ -2741,13 +2739,7 @@ body{
       <span class="yen">円／月</span>
     </div>
 
-    <div class="quick-amts" style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; max-width: 100%; box-sizing: border-box;">
-      <button type="button" onclick="budQuickAdd(1000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1,000</button>
-      <button type="button" onclick="budQuickAdd(5000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+5,000</button>
-      <button type="button" onclick="budQuickAdd(10000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+1万</button>
-      <button type="button" onclick="budQuickAdd(30000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+3万</button>
-      <button type="button" onclick="budQuickAdd(50000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+5万</button>
-      <button type="button" onclick="budQuickAdd(100000)" style="width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;">+10万</button>
+    <div id="budgetQuickAmts" class="quick-amts" style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; max-width: 100%; box-sizing: border-box;">
     </div>
 
     <div class="keypad">
@@ -2819,10 +2811,12 @@ body{
     <div id="ocrStepResult" style="display:none">
       <!-- 読み取り成功 -->
       <div id="ocrResultOk" style="display:none">
-        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:4px">読み取った支払い合計</div>
-        <div style="font-size:32px; font-weight:800; color:var(--pink-deep); margin-bottom:6px; font-variant-numeric:tabular-nums;" id="ocrResultAmount">—</div>
+        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:4px">読み取った金額候補</div>
+        <div style="font-size:14px; font-weight:700; color:var(--ink); margin-bottom:10px">合っている金額を選んでね</div>
+        <div id="ocrCandidates" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;"></div>
+        <button type="button" class="btn ghost small" style="margin-bottom:10px; width:auto;" onclick="document.getElementById('ocrManualInput').focus()">その他候補</button>
         <div style="font-size:12px; color:var(--ink-soft); margin-bottom:2px" id="ocrConfidenceNote"></div>
-        <div style="font-size:12px; color:var(--ink-soft); margin-bottom:12px">違う場合は、下で金額を修正してね</div>
+        <div style="font-size:12px; color:var(--ink-soft); margin-bottom:12px">候補が違うときは手入力してね</div>
         <!-- 手動修正欄 -->
         <label style="font-size:12px; color:var(--ink-soft); margin-bottom:4px; display:block">金額を修正する場合（円）</label>
         <input type="number" id="ocrManualInput" inputmode="numeric" min="0"
@@ -2830,6 +2824,7 @@ body{
           placeholder="例：2384" />
         <button type="button" class="btn block" onclick="applyOcrManual()">この金額で入力する</button>
       </div>
+
 
       <!-- 読み取り失敗 -->
       <div id="ocrFailedNote" class="muted" style="font-size:12px; margin-top:10px; display:none">
@@ -3072,6 +3067,7 @@ function go(name){
     // 変動費／固定費の日付プルダウンを準備し、現在の選択状態を反映
     populateRepeatDay();
     if(typeof switchExpKind === "function") switchExpKind(expKind);
+    generateQuickButtons("inputQuickAmts", quickAmounts, quickAdd);
   }
 }
 // 上部・下部のすべてのナビボタンに同じハンドラを付ける
@@ -3332,6 +3328,39 @@ function keyPress(k){
   // 金額を変えたら「2回目で記録」状態をリセット（誤記録ガード）
   if(typeof resetAmtPrime === "function") resetAmtPrime();
 }
+
+const quickAmounts = [
+  {label: "+100", value: 100},
+  {label: "+500", value: 500},
+  {label: "+1,000", value: 1000},
+  {label: "+5,000", value: 5000},
+  {label: "+1万", value: 10000},
+  {label: "+10万", value: 100000}
+];
+
+const budgetQuickAmounts = [
+  {label: "+1,000", value: 1000},
+  {label: "+5,000", value: 5000},
+  {label: "+1万", value: 10000},
+  {label: "+3万", value: 30000},
+  {label: "+5万", value: 50000},
+  {label: "+10万", value: 100000}
+];
+
+function generateQuickButtons(containerId, amounts, addFunction) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  amounts.forEach(({label, value}) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.onclick = () => addFunction(value);
+    button.style.cssText = "width: 100% !important; min-width: 0 !important; white-space: nowrap !important; font-size: 13px !important; padding: 10px 6px !important; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 46px;";
+    button.textContent = label;
+    container.appendChild(button);
+  });
+}
+
 function quickAdd(v){
   const next = (Number(amountStr) || 0) + v;
   amountStr = String(Math.min(next, 999999999));
@@ -3736,6 +3765,7 @@ function renderSavings(){
   updateSavingsView();
   setupSavingsCalculatorInputs();
   renderAssets();
+  generateQuickButtons("savingsQuickAmts", quickAmounts, savingsQuickAdd);
 }
 
 /* ----- 資産項目（複数登録できる）----- */
@@ -3822,11 +3852,16 @@ function renderAssetsChart(canvasId){
   charts[key] = mkPie(canvasId, labels, data, PALETTE);
 }
 function saveSavings(){
+  const balEl = document.getElementById("savBalance");
+  const thisEl = document.getElementById("savThisMonth");
+  const goalEl = document.getElementById("savGoal");
+  const memoEl = document.getElementById("savMemo");
+  if (!balEl || !thisEl || !goalEl) return;
   DB.savings = {
-    balance:   Number(document.getElementById("savBalance").value)||0,
-    thisMonth: Number(document.getElementById("savThisMonth").value)||0,
-    goal:      Number(document.getElementById("savGoal").value)||0,
-    memo:      document.getElementById("savMemo").value.trim()
+    balance:   Number(balEl.value)||0,
+    thisMonth: Number(thisEl.value)||0,
+    goal:      Number(goalEl.value)||0,
+    memo:      memoEl ? memoEl.value.trim() : ""
   };
   // 設定の目標も同期
   DB.settings.goal = DB.savings.goal;
@@ -4432,6 +4467,7 @@ function renderBudgetPage(){
     `;
     wrap.appendChild(row);
   });
+  generateQuickButtons("budgetQuickAmts", budgetQuickAmounts, budQuickAdd);
 }
 
 /* ========== 予算編集モーダル ========== */
@@ -4544,8 +4580,8 @@ function autoSuggestBudgets(){
    - 抽出後は金額のみ amountStr に反映、画像参照は破棄
    ============================================================ */
 
-const OCR_HIGH_KW = ["お支払い金額","お支払金額","支払い金額","支払金額","支払合計","ご請求金額","請求金額","総合計","税込合計","合計","現計","お買上合計","お買い上げ合計","お会計","税込"];
-const OCR_EXCLUDE_KW = ["小計","消費税","内税","外税","対象","お預り","お預かり","お釣り","釣銭","ポイント","pt","会員","電話","tel","no","番号","日時","日付","時刻"];
+const OCR_HIGH_KW = ["お支払い金額","お支払金額","支払い金額","支払金額","支払合計","ご請求金額","請求金額","総合計","税込合計","合計","現計","お買上合計","お買い上げ合計","お会計","税込","合計（税込）"];
+const OCR_EXCLUDE_KW = ["小計","消費税","内税","外税","対象","お預り","お預かり","お釣り","釣銭","ポイント","pt","会員","電話","tel","no","番号","日時","日付","時刻","税率","8%","10%","点","個","クーポン","jan","コード"];
 const OCR_MAX_AMT = 10000000; // 1,000万円
 const OCR_MIN_AMT = 1;
 
@@ -4560,23 +4596,48 @@ function ocrParseYen(s){
   return n;
 }
 function ocrFindAmounts(line){
-  const re = /(?:[¥￥]\s*)?[\d０-９][\d０-９,，]*\s*円?/g;
+  // カンマ・空白を含む金額全体を1つとして抽出
+  // "5,954" "5 954" "5954" などを同じ値として扱う
+  const re = /(?:[¥￥]\s*)?[\d０-９]+(?:[,，\s]?[\d０-９]+)*\s*円?/g;
   const out = [];
+  const seen = new Set();
   for(const m of line.matchAll(re)){
     const v = ocrParseYen(m[0]);
-    if(v != null) out.push(v);
+    if(v != null && !seen.has(v)) {
+      out.push(v);
+      seen.add(v);
+    }
   }
   return out;
 }
 
 /**
- * extractReceiptTotal: OCRテキストから「支払い合計金額」を1件だけ抽出する
+ * 重複する部分数字を除外する関数
+ * 例：[5954, 954] → [5954] （954は5954の末尾）
+ */
+function filterDuplicateSubstrings(candidates) {
+  const amounts = candidates.map(c => c.amount);
+  return candidates.filter(c => {
+    const str = String(c.amount);
+    const others = amounts.filter(v => v !== c.amount);
+    // 自分の数字が他の数字の末尾に含まれていないか確認
+    return !others.some(o => String(o).endsWith(str));
+  });
+}
+
+/**
+ * extractReceiptTotal: OCRテキストから「支払い合計金額」を抽出する
  * 要件書の receiptTotalExtractor ロジックをベースに実装
  */
 function extractReceiptTotal(ocrText){
   if(!ocrText || !ocrText.trim()){
-    return {amount:null, confidence:"low", reason:"OCRテキストが空です"};
+    return {candidates:[], confidence:"low", reason:"OCRテキストが空です"};
   }
+  // 開発用：OCR全文をconsoleに出力（個人情報に注意）
+  if(typeof console !== "undefined" && console.debug) {
+    console.debug("[OCR生テキスト（開発用）]", ocrText.substring(0, 300) + (ocrText.length > 300 ? "..." : ""));
+  }
+  
   const lines = ocrText.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
   const candidates = [];
 
@@ -4592,27 +4653,39 @@ function extractReceiptTotal(ocrText){
     amounts.forEach(amount=>{
       let score = keyScore;
       if(hasExclude) score -= 8;
-      if(amount >= 100 && amount <= 50000) score += 2;
+      if(amount >= 1000 && amount <= 50000) score += 2; // 1,000円以上優先
+      if(amount >= 10000) score += 3; // 4桁以上をさらに優先
       if(line.includes("円")) score += 1;
       if(score > 0) candidates.push({amount, score, line});
     });
   });
 
   if(candidates.length > 0){
-    const sorted = candidates.sort((a,b)=> b.score-a.score || b.amount-a.amount);
-    const best = sorted[0];
+    // 重複する部分数字を除外
+    let filtered = filterDuplicateSubstrings(candidates);
+    if(filtered.length === 0) filtered = candidates; // すべて除外されたらこないはず
+    
+    const sorted = filtered.sort((a,b)=> b.score-a.score || b.amount-a.amount);
+    const topCandidates = sorted.slice(0, 5); // 最大5候補
+    
+    // 開発用：候補をconsoleに出力
+    if(typeof console !== "undefined" && console.debug) {
+      console.debug("[OCR金額候補]", topCandidates.map(c => `${c.amount}円(スコア${c.score})`).join(", "));
+    }
+    
     return {
-      amount: best.amount,
-      confidence: best.score >= 10 ? "high" : "medium",
-      reason: `合計に近い行から抽出: ${best.line}`
+      candidates: topCandidates.map(c => ({amount: c.amount, line: c.line})),
+      confidence: sorted[0].score >= 10 ? "high" : topCandidates.length > 1 ? "medium" : "low",
+      reason: `候補 ${topCandidates.length}件`
     };
   }
   // フォールバック：全体から最大値
   const allAmounts = ocrFindAmounts(ocrText);
   if(allAmounts.length > 0){
-    return {amount: Math.max(...allAmounts), confidence:"low", reason:"合計キーワードなし・最大値で推定"};
+    const maxAmount = Math.max(...allAmounts);
+    return {candidates: [{amount: maxAmount, line: "全体から最大値"}], confidence:"low", reason:"合計キーワードなし・最大値で推定"};
   }
-  return {amount:null, confidence:"low", reason:"金額を読み取れませんでした"};
+  return {candidates:[], confidence:"low", reason:"金額を読み取れませんでした"};
 }
 
 // 後方互換：旧 extractAmountCandidates は extractReceiptTotal に統合
@@ -4689,7 +4762,10 @@ async function onReceiptFileChosen(ev){
     const result = extractReceiptTotal(text);
     // テキストへの参照を破棄（メモリ・GC任せ）
     text = "";
-    showSingleResult(result);
+    showCandidates(result);
+    // OCR後は金額欄を自動入力せず空欄にしておく
+    amountStr = "";
+    updateAmountDisplay();
   }catch(err){
     // err.messageを表示してもOCR内容は含まれない（Tesseractは内容を例外に入れない設計）
     document.getElementById("ocrStepLoading").style.display = "none";
@@ -4706,28 +4782,49 @@ async function onReceiptFileChosen(ev){
   }
 }
 
-function showSingleResult(result){
+function showCandidates(result){
   document.getElementById("ocrStepLoading").style.display = "none";
   document.getElementById("ocrStepResult").style.display = "";
   const okEl = document.getElementById("ocrResultOk");
   const failEl = document.getElementById("ocrFailedNote");
 
-  if(!result || result.amount == null){
+  if(!result || !result.candidates || result.candidates.length === 0){
     okEl.style.display = "none";
     failEl.style.display = "";
     return;
   }
   failEl.style.display = "none";
   okEl.style.display = "";
-  document.getElementById("ocrResultAmount").textContent = "¥" + result.amount.toLocaleString("ja-JP") + " 円";
-  document.getElementById("ocrManualInput").value = result.amount;
-  // confidence が low のときはやさしい注意文を表示
+  const candEl = document.getElementById("ocrCandidates");
+  candEl.innerHTML = "";
+  
+  // 候補ボタンをすべて表示
+  result.candidates.forEach((cand, idx) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn small";
+    btn.style.cssText = "padding: 8px 12px; font-size: 14px; white-space: nowrap;";
+    btn.textContent = idx === 0 ? `¥${cand.amount.toLocaleString("ja-JP")} ✓` : `¥${cand.amount.toLocaleString("ja-JP")}`;
+    btn.onclick = () => {
+      applyOcrAmount(cand.amount);
+    };
+    candEl.appendChild(btn);
+  });
+  
+  // 手入力補助欄に最初の候補をセット（候補をタップしない場合の編集用）
+  const manualInput = document.getElementById("ocrManualInput");
+  if(manualInput){
+    manualInput.value = result.candidates[0].amount;
+  }
+  
+  // confidence表示
   const confNote = document.getElementById("ocrConfidenceNote");
-  if(result.confidence === "low"){
-    confNote.textContent = "⚠️ 読み取りが不安定かも。金額を確認してね";
-    confNote.style.color = "var(--warn)";
+  if(result.candidates.length === 1 && result.confidence === "high"){
+    confNote.textContent = "✓ 合計金額と思われます";
+    confNote.style.color = "var(--good)";
   } else {
-    confNote.textContent = "";
+    confNote.textContent = "⚠️ 読み取りが不安定です。レシートの合計金額を確認して入力してください";
+    confNote.style.color = "var(--warn)";
   }
 }
 
@@ -4736,9 +4833,6 @@ function applyOcrManual(){
   if(!v || v <= 0){ flash("金額を入力してね"); return; }
   applyOcrAmount(v);
 }
-
-// 旧 showCandidates は削除（showSingleResult に統合済み）
-function showCandidates(){ /* 廃止 */ }
 
 function applyOcrAmount(amount){
   // 念のため安全帯にクランプ
@@ -5186,14 +5280,17 @@ function saveSettings(){
   flash("設定を保存しました。");
 }
 function applyAppName(){
-  document.getElementById("appNameTitle").textContent = DB.settings.appName;
-  document.getElementById("heroAppName").textContent  = DB.settings.appName;
+  const appNameTitle = document.getElementById("appNameTitle");
+  if(appNameTitle) appNameTitle.textContent = DB.settings.appName;
+  const heroAppName = document.getElementById("heroAppName");
+  if(heroAppName) heroAppName.textContent = DB.settings.appName;
   document.title = DB.settings.appName;
 }
 
 function renderCatEditor(){
   const box = document.getElementById("catEditor");
-  box.innerHTML = "";
+  if(!box) return;
+  box.innerHTML = ";
   DB.cats.forEach(c=>{
     const b = document.createElement("button");
     b.textContent = c + " ×";
@@ -5267,6 +5364,6 @@ function flash(msg){
   go("top");
 })();
 </script>
-<div style="position:fixed; bottom:0; right:0; font-size:10px; color:#ccc; z-index:100;">v-calc-20260502</div>
+<div style="position:fixed; bottom:0; right:0; font-size:10px; color:#ccc; z-index:100;">v-fix-20260505-final</div>
 </body>
 </html>
