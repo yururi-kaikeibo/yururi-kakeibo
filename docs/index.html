@@ -5305,7 +5305,9 @@ function applyAppName(){
 function renderCatEditor(){
   const box = document.getElementById("catEditor");
   if(!box) return;
-  box.innerHTML = ";
+  while (box.firstChild) {
+    box.removeChild(box.firstChild);
+  }
   DB.cats.forEach(c=>{
     const b = document.createElement("button");
     b.textContent = c + " ×";
@@ -5423,6 +5425,6 @@ window.addEventListener("load", function(){
   }
 });
 </script>
-<!-- Version check: v-ghpages-clickfix-20250506-final -->
+<!-- v-ghpages-clickfix-20260506-final-verified -->
 </body>
 </html>
