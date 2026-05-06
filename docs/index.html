@@ -2812,12 +2812,19 @@ body{
     <div id="ocrStepResult" style="display:none">
       <!-- 読み取り成功 -->
       <div id="ocrResultOk" style="display:none">
-        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:4px">レシートの読み取り結果を確認してください</div>
-        <div style="font-size:14px; font-weight:700; color:var(--ink); margin-bottom:10px">読み取った候補をタップして選んでね</div>
-        <div id="ocrCandidates" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;"></div>
-        <button type="button" class="btn ghost small" style="margin-bottom:10px; width:auto;" onclick="document.getElementById('ocrManualInput').focus()">その他候補</button>
+        <div style="font-size:14px; font-weight:700; color:var(--ink); margin-bottom:10px">レシートを見ながら入力</div>
+        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:6px">
+          自動読み取りは間違うことがあるため、金額は手入力で確認して記録してください。
+        </div>
+        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px">
+          買い物後にパッと入力できるように、金額欄とクイックボタンを使ってください。
+        </div>
+        <div id="ocrCandidates" style="display:none; flex-wrap:wrap; gap:8px; margin-bottom:10px;"></div>
+        <button type="button" class="btn ghost small" style="display:none; margin-bottom:10px; width:auto;" onclick="document.getElementById('ocrManualInput').focus()">その他候補</button>
         <div style="font-size:12px; color:var(--ink-soft); margin-bottom:2px" id="ocrConfidenceNote"></div>
-        <div style="font-size:12px; color:var(--ink-soft); margin-bottom:12px">数字が違う場合は、手入力で直せます</div>
+        <div style="font-size:12px; color:var(--ink-soft); margin-bottom:12px">
+          金額は手入力で確認して記録してください。
+        </div>
         <!-- 手動修正欄 -->
         <label style="font-size:12px; color:var(--ink-soft); margin-bottom:4px; display:block">金額を修正する場合（円）</label>
         <input type="number" id="ocrManualInput" inputmode="numeric" min="0"
@@ -4732,6 +4739,12 @@ function resetReceiptModal(){
   document.getElementById("ocrFailedNote").style.display = "none";
   const okEl = document.getElementById("ocrResultOk");
   if(okEl) okEl.style.display = "none";
+  const candEl = document.getElementById("ocrCandidates");
+  if(candEl){ candEl.innerHTML = ""; candEl.style.display = "none"; }
+  const confNote = document.getElementById("ocrConfidenceNote");
+  if(confNote){ confNote.textContent = ""; confNote.style.color = "var(--ink-soft)"; }
+  const manualInput = document.getElementById("ocrManualInput");
+  if(manualInput) manualInput.value = "";
   const fill = document.getElementById("ocrFill");
   if(fill) fill.style.width = "0%";
   const lbl = document.getElementById("ocrLabel");
