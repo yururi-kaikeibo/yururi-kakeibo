@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <base href="/yururi-kakeibo/" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#fff7f3" />
 <title>ぱぱっと家計簿</title>
 
@@ -36,7 +36,7 @@
   --radius:    18px;
 }
 *{box-sizing:border-box}
-html,body{margin:0;padding:0}
+html,body{margin:0;padding:0; touch-action: manipulation; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;}
 body{
   font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Noto Sans JP", "Segoe UI", sans-serif;
   background: var(--bg);
@@ -45,7 +45,7 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 a{color:var(--pink-deep); text-decoration:none}
-button{font-family:inherit}
+button{font-family:inherit; font-size:16px; touch-action: manipulation;}
 
 /* ===== ヘッダー / ナビ ===== */
 .app-header{
@@ -141,7 +141,7 @@ main{padding: 14px 14px 110px; max-width: 560px; margin: 0 auto}
   color:#fff; font-weight:600;
   border-radius: 999px;
   padding: 13px 22px;
-  font-size: 15px;
+  font-size: 16px;
   box-shadow: 0 4px 12px rgba(247,181,196,.4);
   transition: transform .1s ease;
 }
@@ -815,10 +815,10 @@ textarea{min-height:80px; resize:vertical}
 /* ===== 予算編集モーダル ===== */
 .budget-modal{
   position:fixed; inset:0; background:rgba(70,40,50,.45);
-  display:none; align-items:flex-end; justify-content:center;
+  display:none; pointer-events:none; align-items:flex-end; justify-content:center;
   z-index:200; backdrop-filter: blur(2px);
 }
-.budget-modal.open{ display:flex }
+.budget-modal.open{ display:flex; pointer-events:auto }
 .budget-modal .sheet{
   background: var(--bg); width:100%; max-width:480px;
   border-radius:24px 24px 0 0; padding:16px 16px 28px;
@@ -3052,38 +3052,40 @@ function go(name){
   window.scrollTo({top:0, behavior:"instant"});
   // ページ表示時にデータ更新
   if(name!="savings") closeSavingsCalculator();
-  if(name==="top")     renderDashboard();   // ダッシュボード一式
-  if(name==="report")  renderReport();
-  if(name==="graph")   renderCharts();
-  if(name==="savings") renderSavings();
-  if(name==="budget")  renderBudgetPage();
-  if(name==="settings")renderSettingsPage();
+  if(name==="top")     try{ renderDashboard(); }catch(e){console.error(e);}
+  if(name==="report")  try{ renderReport(); }catch(e){console.error(e);}
+  if(name==="graph")   try{ renderCharts(); }catch(e){console.error(e);}
+  if(name==="savings") try{ renderSavings(); }catch(e){console.error(e);}
+  if(name==="budget")  try{ renderBudgetPage(); }catch(e){console.error(e);}
+  if(name==="settings")try{ renderSettingsPage(); }catch(e){console.error(e);}
   if(name==="input"){
-    renderTxList();
-    renderInputMini();
+    try{ renderTxList(); }catch(e){console.error(e);}
+    try{ renderInputMini(); }catch(e){console.error(e);}
     // 入力ページに来るたびに、カテゴリー・支払い方法のチップを再描画
     // （万が一DOMが空になっていた場合でも必ず選択肢が表示されるように）
-    renderChips();
-    renderIncomeChips();
+    try{ renderChips(); }catch(e){console.error(e);}
+    try{ renderIncomeChips(); }catch(e){console.error(e);}
     // 変動費／固定費の日付プルダウンを準備し、現在の選択状態を反映
-    populateRepeatDay();
-    if(typeof switchExpKind === "function") switchExpKind(expKind);
-    generateQuickButtons("inputQuickAmts", quickAmounts, quickAdd);
+    try{ populateRepeatDay(); }catch(e){console.error(e);}
+    if(typeof switchExpKind === "function") try{ switchExpKind(expKind); }catch(e){console.error(e);}
+    try{ generateQuickButtons("inputQuickAmts", quickAmounts, quickAdd); }catch(e){console.error(e);}
   }
 }
 // 上部・下部のすべてのナビボタンに同じハンドラを付ける
-document.querySelectorAll("#nav button, #bottomNav button").forEach(b=>{
-  b.addEventListener("click", ()=>go(b.dataset.page));
-});
+// （init() 内で登録）
 
 /* ========== 入力ページ ========== */
 let txKind = "income";
 function switchTxKind(k){
   txKind = k;
-  document.getElementById("segIncome").classList.toggle("on", k==="income");
-  document.getElementById("segExpense").classList.toggle("on", k==="expense");
-  document.getElementById("incomeFields").style.display  = k==="income"  ? "" : "none";
-  document.getElementById("expenseFields").style.display = k==="expense" ? "" : "none";
+  const segIncomeEl = document.getElementById("segIncome");
+  if(segIncomeEl) segIncomeEl.classList.toggle("on", k==="income");
+  const segExpenseEl = document.getElementById("segExpense");
+  if(segExpenseEl) segExpenseEl.classList.toggle("on", k==="expense");
+  const incomeFieldsEl = document.getElementById("incomeFields");
+  if(incomeFieldsEl) incomeFieldsEl.style.display  = k==="income"  ? "" : "none";
+  const expenseFieldsEl = document.getElementById("expenseFields");
+  if(expenseFieldsEl) expenseFieldsEl.style.display = k==="expense" ? "" : "none";
   // レシート読み取りボタンは支出のときだけ表示
   const rb = document.getElementById("receiptBtn");
   if(rb) rb.style.display = k==="expense" ? "flex" : "none";
@@ -3566,10 +3568,10 @@ function addTx(){
   const repeatCb2 = document.getElementById("repeatMonthly");
   if(repeatCb2 && repeatCb2.checked){ repeatCb2.checked = false; toggleRepeatBox(); }
   // 支出ページは変動費に戻しておく
-  if(txKind === "expense" && expKind === "fixed"){ switchExpKind("variable"); }
-  renderChips();
-  renderTxList();
-  renderInputMini(); // ミニグラフを即時更新（記録の達成感が見える）
+  if(txKind === "expense" && expKind === "fixed"){ try{ switchExpKind("variable"); }catch(e){console.error(e);} }
+  try{ renderChips(); }catch(e){console.error(e);}
+  try{ renderTxList(); }catch(e){console.error(e);}
+  try{ renderInputMini(); }catch(e){console.error(e);} // ミニグラフを即時更新（記録の達成感が見える）
   try { renderDashboard && renderDashboard(); } catch(e){}
   try { renderReport    && renderReport();    } catch(e){}
   try { renderCharts    && renderCharts();    } catch(e){}
@@ -3585,6 +3587,7 @@ function addTx(){
 
 function renderTxList(){
   const list = document.getElementById("txList");
+  if(!list) return;
   // 今月分のみ
   const now = new Date();
   const ym = now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
@@ -3618,7 +3621,7 @@ function renderTxList(){
     del.onclick = ()=>{
       if(confirm("この記録を削除しますか？")){
         DB.txs = DB.txs.filter(x=>x.id!==t.id);
-        saveDB(); renderTxList(); renderInputMini();
+        saveDB(); try{ renderTxList(); }catch(e){console.error(e);} try{ renderInputMini(); }catch(e){console.error(e);}
       }
     };
     row.appendChild(left); row.appendChild(amt); row.appendChild(del);
@@ -4238,13 +4241,13 @@ function renderDashboard(){
   // 円グラフ（支出内訳）と中央金額
   const donutAmt = document.getElementById("homeDonutAmount");
   if(donutAmt) donutAmt.textContent = "¥" + Number(expense).toLocaleString();
-  renderHomeExpenseDonut(ym);
+  try{ renderHomeExpenseDonut(ym); }catch(e){console.error(e);}
 
   // 貯金残高ヒーローカード
-  renderSavingsHero();
+  try{ renderSavingsHero(); }catch(e){console.error(e);}
 
   // 応援メッセージ（前月比）
-  renderEncourage(ym);
+  try{ renderEncourage(ym); }catch(e){console.error(e);}
 
   // ▼ 補助情報（折りたたみ）
   // 総資産
@@ -5375,6 +5378,12 @@ document.addEventListener("DOMContentLoaded", function init(){
   renderIncomeChips();        // 収入の種類チップも初期化
   updateAmountDisplay();      // 金額表示の初期化（プレースホルダー状態）
   attachAmountDoubleTap();    // 金額エリアのダブルタップで即記録するハンドラを装着
+  // 上部・下部のすべてのナビボタンに同じハンドラを付ける
+  if(document.querySelector("#nav") && document.querySelector("#bottomNav")) {
+    document.querySelectorAll("#nav button, #bottomNav button").forEach(b=>{
+      b.addEventListener("click", ()=>go(b.dataset.page));
+    });
+  }
   go("top");
 });
 // GitHub PagesなどでDOMContentLoadedが発火しない場合の保険
@@ -5382,6 +5391,5 @@ window.addEventListener("load", function(){
   if(document.readyState === "complete" && !document.querySelector(".page.active")) init();
 });
 </script>
-<div style="position:fixed; bottom:0; right:0; font-size:10px; color:#ccc; z-index:100;">v-fix-20260505-final</div>
 </body>
 </html>
