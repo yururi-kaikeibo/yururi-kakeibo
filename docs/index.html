@@ -2770,27 +2770,29 @@ body{
 </div>
 
 <!-- ============================ レシートOCR モーダル ============================ -->
-<input type="file" id="receiptFileInput" accept="image/*" capture="environment" style="display:none" onchange="onReceiptFileChosen(event)" />
+<input type="file" id="receiptFileInput" accept="image/*" capture="environment" style="display:none" />
 <div id="receiptModal" class="budget-modal" onclick="closeReceiptModalBg(event)">
   <div class="sheet" onclick="event.stopPropagation()">
     <div class="head">
-      <div class="cat-label">📸 レシートを読み取る</div>
+      <div class="cat-label">📸 レシート機能は調整中です</div>
       <button type="button" class="close-x" onclick="closeReceiptModal()" aria-label="閉じる">×</button>
     </div>
 
     <div class="privacy-pill">
-      🔒 撮影した画像は<strong>この端末の中だけで処理</strong>し、保存もアップロードもしません。
-      合計金額のみを読み取り、店名・商品名・カード番号などは記録しません。
+      🔒 画像はこの端末の中だけで処理され、外部送信はしません。
+      ただしレシートOCRは現在停止中のため、金額は手入力で記録してください。
     </div>
 
-    <!-- ステップ1：画像選択／撮影 -->
+    <!-- ステップ1：手入力案内 -->
     <div id="ocrStepPick">
-      <button type="button" class="btn block" onclick="document.getElementById('receiptFileInput').click()">
-        レシートを撮影／選ぶ
-      </button>
-      <div class="muted" style="font-size:11px; text-align:center; margin-top:8px">
-        ※読み取り精度は印字状態に左右されます。あとから手入力でも修正できます。
+      <div style="font-size:14px; font-weight:700; color:var(--ink); margin-bottom:10px">レシートを見ながら入力</div>
+      <div style="font-size:13px; color:var(--ink-soft); margin-bottom:16px; line-height:1.7">
+        レシート機能は調整中です。今は金額を手入力で記録してください。<br>
+        クイックボタンを使うと、買い物後にパッと入力できます。
       </div>
+      <button type="button" class="btn block" onclick="closeReceiptModalManual()">
+        手入力で記録する
+      </button>
     </div>
 
     <!-- ステップ2：処理中 -->
@@ -5442,6 +5444,6 @@ window.addEventListener("load", function(){
 });
 </script>
 <!-- v-ghpages-clickfix-20260506-final-verified -->
-<!-- v-receipt-ocr-confirm-20260506 -->
+<!-- v-receipt-disabled-20260506 -->
 </body>
 </html>
