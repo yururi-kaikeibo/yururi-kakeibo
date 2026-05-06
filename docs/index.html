@@ -5363,7 +5363,11 @@ function flash(msg){
 }
 
 /* ========== 起動 ========== */
-document.addEventListener("DOMContentLoaded", function init(){
+let initCompleted = false;
+function init(){
+  if(initCompleted) return;
+  initCompleted = true;
+  
   // 日付の初期値を今日
   const txDateEl = document.getElementById("txDate");
   if(txDateEl) txDateEl.value = todayStr();
@@ -5374,22 +5378,51 @@ document.addEventListener("DOMContentLoaded", function init(){
   // 起動時：前回の支払い方法を自動選択しておく（ズボラさん導線）
   selectedPay = DB.lastPay || null;
   applyAppName();
-  renderChips();
-  renderIncomeChips();        // 収入の種類チップも初期化
-  updateAmountDisplay();      // 金額表示の初期化（プレースホルダー状態）
-  attachAmountDoubleTap();    // 金額エリアのダブルタップで即記録するハンドラを装着
+  try{ renderChips(); }catch(e){console.error(e);}
+  try{ renderIncomeChips(); }catch(e){console.error(e);}
+  try{ updateAmountDisplay(); }catch(e){console.error(e);}
+  try{ attachAmountDoubleTap(); }catch(e){console.error(e);}
+  
   // 上部・下部のすべてのナビボタンに同じハンドラを付ける
-  if(document.querySelector("#nav") && document.querySelector("#bottomNav")) {
-    document.querySelectorAll("#nav button, #bottomNav button").forEach(b=>{
-      b.addEventListener("click", ()=>go(b.dataset.page));
-    });
+  const navEl = document.querySelector("#nav");
+  const bottomNavEl = document.querySelector("#bottomNav");
+  if(navEl || bottomNavEl) {
+    const navButtons = document.querySelectorAll("#nav button[data-page], #bottomNav button[data-page]");
+    if(navButtons.length > 0) {
+      navButtons.forEach(b=>{
+        b.addEventListener("click", (e)=>{
+          e.preventDefault();
+          const page = b?.dataset?.page;
+          if(page && typeof go === "function") go(page);
+        });
+      });
+    }
   }
+  
+  // フォールバック：汎用クリックハンドラ（キャプチャフェーズで登録）
+  document.addEventListener("click", function fallbackClickHandler(e){
+    const btn = e.target.closest("button[data-page]");
+    if(btn) {
+      const page = btn?.dataset?.page;
+      if(page && typeof go === "function") {
+        e.preventDefault();
+        e.stopPropagation();
+        go(page);
+      }
+    }
+  }, true);
+  
   go("top");
-});
+}
+
+document.addEventListener("DOMContentLoaded", init);
 // GitHub PagesなどでDOMContentLoadedが発火しない場合の保険
 window.addEventListener("load", function(){
-  if(document.readyState === "complete" && !document.querySelector(".page.active")) init();
+  if(document.readyState === "complete" && !document.querySelector(".page.active")) {
+    init();
+  }
 });
 </script>
+<!-- Version check: v-ghpages-clickfix-20250506-final -->
 </body>
 </html>
