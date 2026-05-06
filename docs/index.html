@@ -2812,12 +2812,12 @@ body{
     <div id="ocrStepResult" style="display:none">
       <!-- 読み取り成功 -->
       <div id="ocrResultOk" style="display:none">
-        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:4px">読み取った金額候補</div>
-        <div style="font-size:14px; font-weight:700; color:var(--ink); margin-bottom:10px">合っている金額を選んでね</div>
+        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:4px">レシートの読み取り結果を確認してください</div>
+        <div style="font-size:14px; font-weight:700; color:var(--ink); margin-bottom:10px">読み取った候補をタップして選んでね</div>
         <div id="ocrCandidates" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;"></div>
         <button type="button" class="btn ghost small" style="margin-bottom:10px; width:auto;" onclick="document.getElementById('ocrManualInput').focus()">その他候補</button>
         <div style="font-size:12px; color:var(--ink-soft); margin-bottom:2px" id="ocrConfidenceNote"></div>
-        <div style="font-size:12px; color:var(--ink-soft); margin-bottom:12px">候補が違うときは手入力してね</div>
+        <div style="font-size:12px; color:var(--ink-soft); margin-bottom:12px">数字が違う場合は、手入力で直せます</div>
         <!-- 手動修正欄 -->
         <label style="font-size:12px; color:var(--ink-soft); margin-bottom:4px; display:block">金額を修正する場合（円）</label>
         <input type="number" id="ocrManualInput" inputmode="numeric" min="0"
@@ -4832,11 +4832,14 @@ function showCandidates(result){
   
   // confidence表示
   const confNote = document.getElementById("ocrConfidenceNote");
-  if(result.candidates.length === 1 && result.confidence === "high"){
-    confNote.textContent = "✓ 合計金額と思われます";
+  if(result.confidence === "high"){
+    confNote.textContent = "✓ 読み取り候補を確認してください。合計金額と思われます。";
     confNote.style.color = "var(--good)";
+  } else if(result.confidence === "medium"){
+    confNote.textContent = "⚠️ 読み取り候補を確認してください。数字が違う場合は手入力で直せます。";
+    confNote.style.color = "var(--warn)";
   } else {
-    confNote.textContent = "⚠️ 読み取りが不安定です。レシートの合計金額を確認して入力してください";
+    confNote.textContent = "⚠️ 読み取り候補を確認してください。数字が違う場合は手入力で直せます。";
     confNote.style.color = "var(--warn)";
   }
 }
@@ -5426,5 +5429,6 @@ window.addEventListener("load", function(){
 });
 </script>
 <!-- v-ghpages-clickfix-20260506-final-verified -->
+<!-- v-receipt-ocr-confirm-20260506 -->
 </body>
 </html>
