@@ -5384,5 +5384,154 @@ window.addEventListener("load", function(){
 });
 </script>
 <div style="position:fixed; bottom:0; right:0; font-size:10px; color:#ccc; z-index:100;">v-ghpages-tapfix</div>
+<!-- v-force-nav-override-20260508 -->
+<script>
+(function () {
+  function addTapStyle() {
+    var st = document.createElement("style");
+    st.textContent = `
+      button,[data-page],nav button,.nav button,.top-nav button,.bottom-nav button,a[data-page]{
+        cursor:pointer;
+        touch-action:manipulation;
+      }
+      .ocr-modal,.receipt-modal,.modal-backdrop,.overlay[hidden]{
+        display:none!important;
+        pointer-events:none!important;
+      }
+    `;
+    document.head.appendChild(st);
+  }
+
+  function getCandidates(raw) {
+    var t = String(raw || "").trim();
+    var href = t.replace(/^#/, "").replace(/^page-/, "");
+
+    if (/ホーム|home|top/i.test(t)) return ["top", "home"];
+    if (/入力|記録|input/i.test(t)) return ["input"];
+    if (/貯金|資産|saving|asset/i.test(t)) return ["saving", "assets", "asset"];
+    if (/予算|budget/i.test(t)) return ["budget"];
+    if (/月間|レポート|report/i.test(t)) return ["report"];
+    if (/グラフ|graph/i.test(t)) return ["graph"];
+    if (/instagram|インスタ/i.test(t)) return ["instagram"];
+    if (/使い方|guide/i.test(t)) return ["guide"];
+    if (/設定|settings/i.test(t)) return ["settings"];
+    if (/明細|履歴|detail|history/i.test(t)) return ["detail", "history", "transactions"];
+    if (/カレンダー|calendar/i.test(t)) return ["calendar"];
+    if (/口座|account/i.test(t)) return ["account"];
+    if (/その他|more|other/i.test(t)) return ["other", "more"];
+
+    return [href, t].filter(Boolean);
+  }
+
+  function findPage(candidates) {
+    var pages = Array.from(document.querySelectorAll(".page"));
+    for (var i = 0; i < candidates.length; i++) {
+      var name = candidates[i];
+
+      var byId =
+        document.getElementById(name) ||
+        document.getElementById("page-" + name) ||
+        document.getElementById("page_" + name) ||
+        document.getElementById(name + "Page");
+
+      if (byId) return byId;
+
+      for (var j = 0; j < pages.length; j++) {
+        var p = pages[j];
+        if (
+          p.dataset.page === name ||
+          p.id === name ||
+          p.id === "page-" + name ||
+          p.id === "page_" + name ||
+          p.id === name + "Page"
+        ) {
+          return p;
+        }
+      }
+    }
+    return null;
+  }
+
+  window.forceGo = function (raw) {
+    var candidates = getCandidates(raw);
+    var target = findPage(candidates);
+    var pages = Array.from(document.querySelectorAll(".page"));
+
+    if (!target) {
+      console.warn("forceGo target not found:", raw, candidates);
+      return false;
+    }
+
+    pages.forEach(function (p) {
+      p.classList.remove("active");
+      p.hidden = true;
+    });
+
+    target.hidden = false;
+    target.classList.add("active");
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return false;
+  };
+
+  window.go = window.forceGo;
+
+  function pageNameFrom(el) {
+    return (
+      el.dataset.page ||
+      el.getAttribute("data-page") ||
+      el.getAttribute("href") ||
+      el.textContent ||
+      ""
+    );
+  }
+
+  function bindNav() {
+    var selector =
+      "button[data-page],[data-page],nav button,.nav button,.top-nav button,.bottom-nav button,a[data-page]";
+    document.querySelectorAll(selector).forEach(function (el) {
+      if (el.__forceNavBound) return;
+      el.__forceNavBound = true;
+      el.addEventListener(
+        "click",
+        function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          window.forceGo(pageNameFrom(el));
+        },
+        true
+      );
+    });
+  }
+
+  document.addEventListener(
+    "click",
+    function (e) {
+      var el = e.target.closest(
+        "button[data-page],[data-page],nav button,.nav button,.top-nav button,.bottom-nav button,a[data-page]"
+      );
+      if (!el) return;
+      e.preventDefault();
+      e.stopPropagation();
+      window.forceGo(pageNameFrom(el));
+    },
+    true
+  );
+
+  function boot() {
+    addTapStyle();
+    bindNav();
+    if (!document.querySelector(".page.active")) {
+      window.forceGo("top");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", boot);
+  window.addEventListener("load", function () {
+    setTimeout(boot, 100);
+  });
+  setTimeout(boot, 300);
+})();
+</script>
 </body>
 </html>
