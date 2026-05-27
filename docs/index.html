@@ -3,9 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <base href="/yururi-kakeibo/" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#fff7f3" />
 <title>ぱぱっと家計簿</title>
+  <link rel="icon" type="image/png" href="./app-icon.png">
+<link rel="apple-touch-icon" href="./app-icon.png">
 
 <!-- ====== CLAUDE.md governance summary（実装時の自己チェック）======
 [ガバナンス] 機能追加のたび、ターゲット主婦のやさしい体験を最優先。投資・保険・税金の個別判断はしない。
@@ -36,7 +38,7 @@
   --radius:    18px;
 }
 *{box-sizing:border-box}
-html,body{margin:0;padding:0}
+html,body{margin:0;padding:0; touch-action: manipulation; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;}
 body{
   font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Noto Sans JP", "Segoe UI", sans-serif;
   background: var(--bg);
@@ -45,7 +47,7 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 a{color:var(--pink-deep); text-decoration:none}
-button{font-family:inherit}
+button{font-family:inherit; font-size:16px; touch-action: manipulation;}
 
 /* ===== ヘッダー / ナビ ===== */
 .app-header{
@@ -90,6 +92,11 @@ button{font-family:inherit}
   background: var(--pink);
   color:#fff; border-color: var(--pink);
   box-shadow: 0 2px 6px rgba(247,181,196,.5);
+}
+
+button, [data-page], nav button {
+  cursor: pointer;
+  touch-action: manipulation;
 }
 
 /* 画面下に固定する主要タブ（ホーム・入力・貯金・レポート・グラフ）*/
@@ -141,7 +148,7 @@ main{padding: 14px 14px 110px; max-width: 560px; margin: 0 auto}
   color:#fff; font-weight:600;
   border-radius: 999px;
   padding: 13px 22px;
-  font-size: 15px;
+  font-size: 16px;
   box-shadow: 0 4px 12px rgba(247,181,196,.4);
   transition: transform .1s ease;
 }
@@ -815,10 +822,10 @@ textarea{min-height:80px; resize:vertical}
 /* ===== 予算編集モーダル ===== */
 .budget-modal{
   position:fixed; inset:0; background:rgba(70,40,50,.45);
-  display:none; align-items:flex-end; justify-content:center;
+  display:none; pointer-events:none; align-items:flex-end; justify-content:center;
   z-index:200; backdrop-filter: blur(2px);
 }
-.budget-modal.open{ display:flex }
+.budget-modal.open{ display:flex; pointer-events:auto }
 .budget-modal .sheet{
   background: var(--bg); width:100%; max-width:480px;
   border-radius:24px 24px 0 0; padding:16px 16px 28px;
@@ -2240,14 +2247,7 @@ body{
     </div>
 
     <!-- レシートから入力（支出のときだけ表示）-->
-    <button type="button" id="receiptBtn" class="receipt-btn" onclick="openReceiptModal()" style="display:none">
-      <span class="ic-circle">🧾</span>
-      <span class="lab">
-        <span class="main">レシートで簡単入力♡</span>
-        <span class="sub">📸ぱしゃっと撮るだけで金額をよみとり</span>
-      </span>
-      <span class="sparkle">✨</span>
-    </button>
+    <!-- レシート機能は調整中です -->
 
     <div class="notice">
       このアプリでは、クレジットカード番号や暗証番号などの重要情報は入力しないでください。家計管理のため、利用金額のみを記録してください。
@@ -2321,6 +2321,25 @@ body{
     </div>
 
     <label id="amountLabel"><span class="step">③</span> 金額</label>
+
+    <!-- レシート機能調整中のお知らせ -->
+    <div style="
+      background: linear-gradient(135deg, #fff7f3 0%, #fce4ea 100%);
+      border: 1px solid #f9d9df;
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(234,145,166,.08);
+    ">
+      <div style="font-size:14px; font-weight:700; color:var(--ink); margin-bottom:8px;">レシート機能は調整中です</div>
+      <div style="font-size:13px; color:var(--ink-soft); line-height:1.6; margin-bottom:6px;">
+        今は金額を手入力で記録してください。<br>
+        クイックボタンを使うと、買い物後にパッと入力できます。
+      </div>
+      <div style="font-size:11px; color:var(--ink-soft); opacity:0.8;">
+        レシート読み取りは、正確に使える形に整えてから再開予定です。
+      </div>
+    </div>
 
     <!-- ★ 修正3: 金額固定バナー（電卓上部に常に見える）★ -->
     <div id="amountStickyBanner" style="
@@ -2770,27 +2789,29 @@ body{
 </div>
 
 <!-- ============================ レシートOCR モーダル ============================ -->
-<input type="file" id="receiptFileInput" accept="image/*" capture="environment" style="display:none" onchange="onReceiptFileChosen(event)" />
+<input type="file" id="receiptFileInput" accept="image/*" capture="environment" style="display:none" />
 <div id="receiptModal" class="budget-modal" onclick="closeReceiptModalBg(event)">
   <div class="sheet" onclick="event.stopPropagation()">
     <div class="head">
-      <div class="cat-label">📸 レシートを読み取る</div>
+      <div class="cat-label">📸 レシート機能は調整中です</div>
       <button type="button" class="close-x" onclick="closeReceiptModal()" aria-label="閉じる">×</button>
     </div>
 
     <div class="privacy-pill">
-      🔒 撮影した画像は<strong>この端末の中だけで処理</strong>し、保存もアップロードもしません。
-      合計金額のみを読み取り、店名・商品名・カード番号などは記録しません。
+      🔒 画像はこの端末の中だけで処理され、外部送信はしません。
+      ただしレシートOCRは現在停止中のため、金額は手入力で記録してください。
     </div>
 
-    <!-- ステップ1：画像選択／撮影 -->
+    <!-- ステップ1：手入力案内 -->
     <div id="ocrStepPick">
-      <button type="button" class="btn block" onclick="document.getElementById('receiptFileInput').click()">
-        レシートを撮影／選ぶ
-      </button>
-      <div class="muted" style="font-size:11px; text-align:center; margin-top:8px">
-        ※読み取り精度は印字状態に左右されます。あとから手入力でも修正できます。
+      <div style="font-size:14px; font-weight:700; color:var(--ink); margin-bottom:10px">レシートを見ながら入力</div>
+      <div style="font-size:13px; color:var(--ink-soft); margin-bottom:16px; line-height:1.7">
+        レシート機能は調整中です。今は金額を手入力で記録してください。<br>
+        クイックボタンを使うと、買い物後にパッと入力できます。
       </div>
+      <button type="button" class="btn block" onclick="closeReceiptModalManual()">
+        手入力で記録する
+      </button>
     </div>
 
     <!-- ステップ2：処理中 -->
@@ -2812,12 +2833,19 @@ body{
     <div id="ocrStepResult" style="display:none">
       <!-- 読み取り成功 -->
       <div id="ocrResultOk" style="display:none">
-        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:4px">読み取った金額候補</div>
-        <div style="font-size:14px; font-weight:700; color:var(--ink); margin-bottom:10px">合っている金額を選んでね</div>
-        <div id="ocrCandidates" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;"></div>
-        <button type="button" class="btn ghost small" style="margin-bottom:10px; width:auto;" onclick="document.getElementById('ocrManualInput').focus()">その他候補</button>
+        <div style="font-size:14px; font-weight:700; color:var(--ink); margin-bottom:10px">レシートを見ながら入力</div>
+        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:6px">
+          自動読み取りは間違うことがあるため、金額は手入力で確認して記録してください。
+        </div>
+        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px">
+          買い物後にパッと入力できるように、金額欄とクイックボタンを使ってください。
+        </div>
+        <div id="ocrCandidates" style="display:none; flex-wrap:wrap; gap:8px; margin-bottom:10px;"></div>
+        <button type="button" class="btn ghost small" style="display:none; margin-bottom:10px; width:auto;" onclick="document.getElementById('ocrManualInput').focus()">その他候補</button>
         <div style="font-size:12px; color:var(--ink-soft); margin-bottom:2px" id="ocrConfidenceNote"></div>
-        <div style="font-size:12px; color:var(--ink-soft); margin-bottom:12px">候補が違うときは手入力してね</div>
+        <div style="font-size:12px; color:var(--ink-soft); margin-bottom:12px">
+          金額は手入力で確認して記録してください。
+        </div>
         <!-- 手動修正欄 -->
         <label style="font-size:12px; color:var(--ink-soft); margin-bottom:4px; display:block">金額を修正する場合（円）</label>
         <input type="number" id="ocrManualInput" inputmode="numeric" min="0"
@@ -2880,7 +2908,7 @@ body{
 
 <script>
 /* =====================================================================
-   ぱぱっと家計簿 — レシート撮るだけ、責めないシンプル家計簿
+   ぱぱっと家計簿 — シンプルでやさしい家計簿
    - データはこのブラウザのlocalStorageに保存（サーバー送信なし）
    - クレカ番号・暗証番号・口座番号などは入力させない設計
    - 家計診断（点数化／タイプ判定）は実装しない方針
@@ -3072,21 +3100,23 @@ function go(name){
   }
 }
 // 上部・下部のすべてのナビボタンに同じハンドラを付ける
-document.querySelectorAll("#nav button, #bottomNav button").forEach(b=>{
-  b.addEventListener("click", ()=>go(b.dataset.page));
-});
+// （init() 内で登録）
 
 /* ========== 入力ページ ========== */
 let txKind = "income";
 function switchTxKind(k){
   txKind = k;
-  document.getElementById("segIncome").classList.toggle("on", k==="income");
-  document.getElementById("segExpense").classList.toggle("on", k==="expense");
-  document.getElementById("incomeFields").style.display  = k==="income"  ? "" : "none";
-  document.getElementById("expenseFields").style.display = k==="expense" ? "" : "none";
-  // レシート読み取りボタンは支出のときだけ表示
-  const rb = document.getElementById("receiptBtn");
-  if(rb) rb.style.display = k==="expense" ? "flex" : "none";
+  const segIncomeEl = document.getElementById("segIncome");
+  if(segIncomeEl) segIncomeEl.classList.toggle("on", k==="income");
+  const segExpenseEl = document.getElementById("segExpense");
+  if(segExpenseEl) segExpenseEl.classList.toggle("on", k==="expense");
+  const incomeFieldsEl = document.getElementById("incomeFields");
+  if(incomeFieldsEl) incomeFieldsEl.style.display  = k==="income"  ? "" : "none";
+  const expenseFieldsEl = document.getElementById("expenseFields");
+  if(expenseFieldsEl) expenseFieldsEl.style.display = k==="expense" ? "" : "none";
+  // レシート読み取りボタンは非表示（機能停止中）
+  // const rb = document.getElementById("receiptBtn");
+  // if(rb) rb.style.display = k==="expense" ? "flex" : "none";
   // タブ切り替えのたびに、表示するほうのチップを再描画して必ず項目が出るようにする
   if(k==="income"){
     renderIncomeChips();
@@ -4239,13 +4269,13 @@ function renderDashboard(){
   // 円グラフ（支出内訳）と中央金額
   const donutAmt = document.getElementById("homeDonutAmount");
   if(donutAmt) donutAmt.textContent = "¥" + Number(expense).toLocaleString();
-  renderHomeExpenseDonut(ym);
+  try{ renderHomeExpenseDonut(ym); }catch(e){console.error(e);}
 
   // 貯金残高ヒーローカード
-  renderSavingsHero();
+  try{ renderSavingsHero(); }catch(e){console.error(e);}
 
   // 応援メッセージ（前月比）
-  renderEncourage(ym);
+  try{ renderEncourage(ym); }catch(e){console.error(e);}
 
   // ▼ 補助情報（折りたたみ）
   // 総資産
@@ -4730,6 +4760,12 @@ function resetReceiptModal(){
   document.getElementById("ocrFailedNote").style.display = "none";
   const okEl = document.getElementById("ocrResultOk");
   if(okEl) okEl.style.display = "none";
+  const candEl = document.getElementById("ocrCandidates");
+  if(candEl){ candEl.innerHTML = ""; candEl.style.display = "none"; }
+  const confNote = document.getElementById("ocrConfidenceNote");
+  if(confNote){ confNote.textContent = ""; confNote.style.color = "var(--ink-soft)"; }
+  const manualInput = document.getElementById("ocrManualInput");
+  if(manualInput) manualInput.value = "";
   const fill = document.getElementById("ocrFill");
   if(fill) fill.style.width = "0%";
   const lbl = document.getElementById("ocrLabel");
@@ -4830,11 +4866,14 @@ function showCandidates(result){
   
   // confidence表示
   const confNote = document.getElementById("ocrConfidenceNote");
-  if(result.candidates.length === 1 && result.confidence === "high"){
-    confNote.textContent = "✓ 合計金額と思われます";
+  if(result.confidence === "high"){
+    confNote.textContent = "✓ 読み取り候補を確認してください。合計金額と思われます。";
     confNote.style.color = "var(--good)";
+  } else if(result.confidence === "medium"){
+    confNote.textContent = "⚠️ 読み取り候補を確認してください。数字が違う場合は手入力で直せます。";
+    confNote.style.color = "var(--warn)";
   } else {
-    confNote.textContent = "⚠️ 読み取りが不安定です。レシートの合計金額を確認して入力してください";
+    confNote.textContent = "⚠️ 読み取り候補を確認してください。数字が違う場合は手入力で直せます。";
     confNote.style.color = "var(--warn)";
   }
 }
@@ -5303,7 +5342,9 @@ function applyAppName(){
 function renderCatEditor(){
   const box = document.getElementById("catEditor");
   if(!box) return;
-  box.innerHTML = ";
+  while (box.firstChild) {
+    box.removeChild(box.firstChild);
+  }
   DB.cats.forEach(c=>{
     const b = document.createElement("button");
     b.textContent = c + " ×";
@@ -5361,7 +5402,11 @@ function flash(msg){
 }
 
 /* ========== 起動 ========== */
-document.addEventListener("DOMContentLoaded", function init(){
+let initCompleted = false;
+function init(){
+  if(initCompleted) return;
+  initCompleted = true;
+  
   // 日付の初期値を今日
   const txDateEl = document.getElementById("txDate");
   if(txDateEl) txDateEl.value = todayStr();
@@ -5372,17 +5417,148 @@ document.addEventListener("DOMContentLoaded", function init(){
   // 起動時：前回の支払い方法を自動選択しておく（ズボラさん導線）
   selectedPay = DB.lastPay || null;
   applyAppName();
-  renderChips();
-  renderIncomeChips();        // 収入の種類チップも初期化
-  updateAmountDisplay();      // 金額表示の初期化（プレースホルダー状態）
-  attachAmountDoubleTap();    // 金額エリアのダブルタップで即記録するハンドラを装着
+  try{ renderChips(); }catch(e){console.error(e);}
+  try{ renderIncomeChips(); }catch(e){console.error(e);}
+  try{ updateAmountDisplay(); }catch(e){console.error(e);}
+  try{ attachAmountDoubleTap(); }catch(e){console.error(e);}
+  
+  // 上部・下部のすべてのナビボタンにイベント委譲でハンドラを付ける
+  // documentにクリックイベントを登録し、data-page属性のあるボタンを拾う
+  document.addEventListener("click", function navClickHandler(e){
+    const btn = e.target.closest("button[data-page]");
+    if(btn) {
+      const page = btn.dataset.page;
+      if(page && typeof go === "function") {
+        e.preventDefault();
+        e.stopPropagation();
+        go(page);
+      }
+    }
+  }, true); // キャプチャフェーズで登録
+  
+  // 個別登録も追加（保険）
+  const navButtons = document.querySelectorAll("#nav button[data-page], #bottomNav button[data-page]");
+  navButtons.forEach(b => {
+    b.addEventListener("click", (e) => {
+      e.preventDefault();
+      const page = b.dataset.page;
+      if(page && typeof go === "function") go(page);
+    });
+  });
+  
   go("top");
-});
+}
+
+document.addEventListener("DOMContentLoaded", init);
 // GitHub PagesなどでDOMContentLoadedが発火しない場合の保険
 window.addEventListener("load", function(){
-  if(document.readyState === "complete" && !document.querySelector(".page.active")) init();
+  setTimeout(init, 100); // 少し遅れてinitを呼ぶ
 });
+window.addEventListener("load", function(){
+  if(document.readyState === "complete" && !document.querySelector(".page.active")) {
+    init();
+  }
+});
+// さらに保険として直接window.onloadを設定
+window.onload = function(){
+  if(!document.querySelector(".page.active")) {
+    init();
+  }
+};
 </script>
-<div style="position:fixed; bottom:0; right:0; font-size:10px; color:#ccc; z-index:100;">v-ghpages-tapfix</div>
+<script>
+(function(){
+  // v-nav-render-bridge-20260509
+  // 強制ナビは残すが、ページだけ切り替える古い forceGo は使わない。
+  // 必ず本来の go() を呼び、各ページの render 処理（アイコン・電卓・グラフ等）も実行する。
+  const originalGo = (typeof window.go === "function") ? window.go : null;
+
+  function normalizePageName(name){
+    if(!name) return null;
+    name = String(name).trim().toLowerCase();
+    if(!name) return null;
+    const mapping = {
+      home: "top", top: "top", ホーム: "top",
+      入力: "input", input: "input", 明細: "input",
+      貯金: "savings", 貯金・資産: "savings", 資産: "savings", 口座: "savings", savings: "savings", assets: "savings",
+      予算: "budget", budget: "budget",
+      月間レポート: "report", カレンダー: "report", report: "report",
+      グラフ: "graph", graph: "graph",
+      instagram案内: "ig", instagram: "ig", ig: "ig",
+      使い方: "howto", guide: "howto", howto: "howto",
+      設定: "settings", その他: "settings", settings: "settings",
+      privacy: "privacy", プライバシー: "privacy"
+    };
+    return mapping[name] || name;
+  }
+
+  function fallbackPageSwitch(pageName){
+    const normalized = normalizePageName(pageName);
+    if(!normalized) return;
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    const pageElement = document.getElementById("page-" + normalized) ||
+      document.querySelector(".page[id='" + normalized + "'], .page[data-page='" + normalized + "']");
+    if(!pageElement){ console.warn("page not found:", pageName); return; }
+    pageElement.classList.add("active");
+    document.querySelectorAll("#nav button, #bottomNav button").forEach(b => {
+      const targetName = normalizePageName(b.dataset.page || b.textContent || "");
+      b.classList.toggle("active", targetName === normalized);
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function forceGo(pageName){
+    const normalized = normalizePageName(pageName);
+    if(!normalized) return;
+    if(typeof originalGo === "function"){
+      originalGo(normalized);
+      return;
+    }
+    fallbackPageSwitch(normalized);
+  }
+
+  function resolveNavPage(el){
+    if(!el) return null;
+    const dataPage = el.getAttribute("data-page");
+    if(dataPage) return normalizePageName(dataPage);
+    const text = el.textContent || el.innerText || "";
+    return normalizePageName(text.trim());
+  }
+
+  function handleNavClick(e){
+    const target = e.target.closest("button[data-page], #nav button, #bottomNav button, a[data-page]");
+    if(!target) return;
+    const pageName = resolveNavPage(target);
+    if(!pageName) return;
+    e.preventDefault();
+    e.stopPropagation();
+    forceGo(pageName);
+  }
+
+  document.addEventListener("click", handleNavClick, true);
+  document.querySelectorAll("button[data-page], #nav button, #bottomNav button, a[data-page]").forEach(el => {
+    el.addEventListener("click", function(e){
+      const pageName = resolveNavPage(el);
+      if(!pageName) return;
+      e.preventDefault();
+      e.stopPropagation();
+      forceGo(pageName);
+    });
+  });
+
+  window.forceGo = forceGo;
+  // ここで window.go は上書きしない。本来の go() を守る。
+
+  if(!document.querySelector(".page.active")){
+    forceGo("top");
+  }
+})();
+</script>
+<!-- v-ghpages-clickfix-20260506-final-verified -->
+<!-- v-receipt-note-only-20260506 -->
+<!-- v-nav-fix-after-receipt-note-20260508 -->
+<!-- v-nav-individual-registration-20260508 -->
+<!-- v-force-nav-override-20260508 -->
+<!-- v-nav-render-bridge-20260509 -->
 </body>
 </html>
