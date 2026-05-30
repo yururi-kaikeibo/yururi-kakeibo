@@ -6,8 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#fff7f3" />
 <title>ぱぱっと家計簿</title>
-  <link rel="icon" type="image/png" href="./app-icon.png">
-<link rel="apple-touch-icon" href="./app-icon.png">
 
 <!-- ====== CLAUDE.md governance summary（実装時の自己チェック）======
 [ガバナンス] 機能追加のたび、ターゲット主婦のやさしい体験を最優先。投資・保険・税金の個別判断はしない。
@@ -2621,13 +2619,14 @@ body{
     <div style="font-size:48px; margin-bottom:16px;">📸</div>
     <h2 style="font-size:18px; margin-bottom:12px; font-weight:700;">Instagramのご案内</h2>
     <p style="color:var(--ink-soft); font-size:14px; line-height:1.8; margin-bottom:20px;">
-      ゆるりママのInstagramでは、家計管理・節約・NISA・楽天経済圏・貯金の仕組み化について、主婦目線でわかりやすく発信しています。<br><br>
-      このアプリと一緒に使うと、<br>
-      ・家計を見える化する<br>
-      ・ムダづかいに気づく<br>
-      ・貯金の目標を立てる<br>
-      ・将来のお金を少しずつ整える<br>
-      ことができます。<br><br>
+      ゆるりママのInstagramでは、<br>
+      家計管理・節約・NISA・楽天経済圏・貯金の仕組みづくりを<br>
+      主婦目線でわかりやすく発信しています。<br><br>
+      家計簿が続かない…<br>
+      貯金したいけど何から始めればいいかわからない…<br>
+      NISAや制度のことがむずかしい…<br><br>
+      そんな方に向けて、<br>
+      今日からできる家計の整え方をお届けしています。<br><br>
       無理なく、ゆるく、でも着実に。<br>
       一緒に家計を整えていきましょう。
     </p>
@@ -5468,87 +5467,103 @@ window.onload = function(){
 </script>
 <script>
 (function(){
-  // v-nav-render-bridge-20260509
-  // 強制ナビは残すが、ページだけ切り替える古い forceGo は使わない。
-  // 必ず本来の go() を呼び、各ページの render 処理（アイコン・電卓・グラフ等）も実行する。
-  const originalGo = (typeof window.go === "function") ? window.go : null;
-
   function normalizePageName(name){
     if(!name) return null;
     name = String(name).trim().toLowerCase();
     if(!name) return null;
     const mapping = {
-      home: "top", top: "top", ホーム: "top",
-      入力: "input", input: "input", 明細: "input",
-      貯金: "savings", 貯金・資産: "savings", 資産: "savings", 口座: "savings", savings: "savings", assets: "savings",
+      home: "top", top: "top",
+      入力: "input", input: "input",
+      貯金: "savings", 貯金・資産: "savings", 資産: "savings", savings: "savings", assets: "savings",
       予算: "budget", budget: "budget",
-      月間レポート: "report", カレンダー: "report", report: "report",
+      月間レポート: "report", report: "report",
       グラフ: "graph", graph: "graph",
       instagram案内: "ig", instagram: "ig", ig: "ig",
       使い方: "howto", guide: "howto", howto: "howto",
-      設定: "settings", その他: "settings", settings: "settings",
+      設定: "settings", settings: "settings",
       privacy: "privacy", プライバシー: "privacy"
     };
-    return mapping[name] || name;
+    if(mapping[name]) return mapping[name];
+    if(name === "ホーム") return "top";
+    if(name === "明細") return "input";
+    if(name === "カレンダー") return "report";
+    if(name === "口座") return "savings";
+    if(name === "その他") return "settings";
+    return name;
   }
 
-  function fallbackPageSwitch(pageName){
+  function findPageElement(pageName){
+    if(!pageName) return null;
     const normalized = normalizePageName(pageName);
-    if(!normalized) return;
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    const pageElement = document.getElementById("page-" + normalized) ||
-      document.querySelector(".page[id='" + normalized + "'], .page[data-page='" + normalized + "']");
-    if(!pageElement){ console.warn("page not found:", pageName); return; }
-    pageElement.classList.add("active");
-    document.querySelectorAll("#nav button, #bottomNav button").forEach(b => {
-      const targetName = normalizePageName(b.dataset.page || b.textContent || "");
-      b.classList.toggle("active", targetName === normalized);
-    });
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if(!normalized) return null;
+    return document.querySelector(
+      ".page[id='" + normalized + "'], .page[id='page-" + normalized + "'], .page[data-page='" + normalized + "']"
+    );
   }
 
   function forceGo(pageName){
     const normalized = normalizePageName(pageName);
-    if(!normalized) return;
-    if(typeof originalGo === "function"){
-      originalGo(normalized);
+    if(!normalized){
+      console.warn("forceGo: invalid page name:", pageName);
       return;
     }
-    fallbackPageSwitch(normalized);
+    const pages = document.querySelectorAll(".page");
+    pages.forEach(p => p.classList.remove("active"));
+    const pageElement = findPageElement(normalized);
+    if(pageElement){
+      pageElement.classList.add("active");
+      document.querySelectorAll("#nav button, #bottomNav button").forEach(b => {
+        const targetName = normalizePageName(b.dataset.page || b.textContent || "");
+        b.classList.toggle("active", targetName === normalized);
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      console.warn("forceGo: page not found:", pageName);
+    }
   }
 
   function resolveNavPage(el){
     if(!el) return null;
     const dataPage = el.getAttribute("data-page");
     if(dataPage) return normalizePageName(dataPage);
+    const href = el.getAttribute("href");
+    if(href){
+      const hash = href.split("#").pop();
+      if(hash) return normalizePageName(hash.replace(/^page-/, ""));
+      const path = href.replace(/\/.*$/, "");
+      if(path) return normalizePageName(path);
+    }
     const text = el.textContent || el.innerText || "";
     return normalizePageName(text.trim());
   }
 
   function handleNavClick(e){
-    const target = e.target.closest("button[data-page], #nav button, #bottomNav button, a[data-page]");
+    const target = e.target.closest("button[data-page], [data-page], nav button, .nav button, .top-nav button, .bottom-nav button, a[data-page]");
     if(!target) return;
-    const pageName = resolveNavPage(target);
-    if(!pageName) return;
     e.preventDefault();
     e.stopPropagation();
-    forceGo(pageName);
+    const pageName = resolveNavPage(target);
+    if(pageName){
+      forceGo(pageName);
+    }
   }
 
   document.addEventListener("click", handleNavClick, true);
-  document.querySelectorAll("button[data-page], #nav button, #bottomNav button, a[data-page]").forEach(el => {
+
+  const allNavElements = document.querySelectorAll("button[data-page], [data-page], nav button, .nav button, .top-nav button, .bottom-nav button, a[data-page]");
+  allNavElements.forEach(el => {
     el.addEventListener("click", function(e){
-      const pageName = resolveNavPage(el);
-      if(!pageName) return;
       e.preventDefault();
       e.stopPropagation();
-      forceGo(pageName);
+      const pageName = resolveNavPage(el);
+      if(pageName) forceGo(pageName);
     });
   });
 
   window.forceGo = forceGo;
-  // ここで window.go は上書きしない。本来の go() を守る。
+  window.go = forceGo;
 
+  // 初期表示時に .page.active がない場合は home/top を表示
   if(!document.querySelector(".page.active")){
     forceGo("top");
   }
@@ -5559,6 +5574,5 @@ window.onload = function(){
 <!-- v-nav-fix-after-receipt-note-20260508 -->
 <!-- v-nav-individual-registration-20260508 -->
 <!-- v-force-nav-override-20260508 -->
-<!-- v-nav-render-bridge-20260509 -->
 </body>
 </html>
