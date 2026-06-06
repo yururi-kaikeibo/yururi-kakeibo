@@ -37,8 +37,14 @@ header .sub{font-size:10px;color:var(--brm);margin-top:2px;text-align:center}
 .hdr-bell{background:none;border:none;cursor:pointer;padding:4px;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--brm);flex-shrink:0}
 .hdr-bell:active{background:var(--pkl)}
 /* 期間ピルバッジ */
-.period-pill{display:inline-flex;align-items:center;gap:6px;background:var(--wh);border:1.5px solid #f2c0cc;border-radius:22px;padding:5px 16px;font-size:12px;color:var(--pkd);font-weight:600;letter-spacing:.02em;box-shadow:0 1px 8px rgba(74,55,40,.06);margin:4px 0 16px}
+.period-pill{display:inline-flex;align-items:center;gap:6px;background:var(--wh);border:1.5px solid #f2c0cc;border-radius:22px;padding:5px 16px;font-size:12px;color:var(--pkd);font-weight:600;letter-spacing:.02em;box-shadow:0 1px 8px rgba(74,55,40,.06);margin:0}
 .period-pill::before{content:'📅';font-size:12px}
+/* 期間ナビ */
+.home-period-nav{display:flex;align-items:center;justify-content:center;gap:2px;margin:6px 0 6px}
+.home-pnav-btn{background:none;border:none;font-size:26px;color:var(--pkd);cursor:pointer;padding:0 8px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,0,0,0)}
+.home-pnav-btn:active{background:var(--pkl)}
+.home-today-btn{background:var(--wh);border:1.5px solid #f2c0cc;border-radius:16px;padding:5px 16px;font-size:16px;color:var(--pkd);cursor:pointer;font-weight:600;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,0,0,0);display:block;margin:0 auto 10px}
+.home-today-btn:active{background:var(--pkl)}
 /* ホームカード強化 */
 .s-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 .s-box{background:var(--wh);border-radius:18px;padding:16px 10px;text-align:center;box-shadow:0 2px 14px rgba(74,55,40,.07);border:1.5px solid var(--bd)}
@@ -315,10 +321,8 @@ footer{text-align:center;font-size:10px;color:var(--brm);padding:12px;line-heigh
 <!-- ===== 1. ホーム ===== -->
 <section id="page-home" class="page active">
 
-  <!-- 期間ラベル（ピルバッジ） -->
-  <div style="text-align:center;margin:4px 0 0">
-    <span class="period-pill" id="home-period"></span>
-  </div>
+  <!-- 期間ナビ（renderHome()がJS生成） -->
+  <div id="home-period-area" style="text-align:center;margin:8px 0 4px"></div>
 
   <!-- ① 上段4カード：収入・支出・差額・貯蓄率 -->
   <div class="s-row">
@@ -408,7 +412,10 @@ footer{text-align:center;font-size:10px;color:var(--brm);padding:12px;line-heigh
     <div id="h-hd-msg" class="living-msg"></div>
   </div>
 
-  <!-- ④ 今月のひとこと -->
+  <!-- ④ 今月の黒字候補カード -->
+  <div id="h-surplus-card" style="display:none;background:#f0faf0;border:1.5px solid #b2dfdb;border-radius:14px;padding:14px 15px;margin-bottom:13px"></div>
+
+  <!-- ⑤ 今月のひとこと -->
   <div class="kotoba-card" id="h-kotoba-card" style="display:none">
     <p id="h-kotoba">いいペースです！この調子でいきましょう♪</p>
   </div>
@@ -502,7 +509,8 @@ footer{text-align:center;font-size:10px;color:var(--brm);padding:12px;line-heigh
     <button onclick="moveGraph(1)">›</button>
   </div>
   <div class="card">
-    <div class="card-t">カテゴリー別支出</div>
+    <div class="card-t">変動費カテゴリー別支出</div>
+    <div style="font-size:10px;color:var(--brm);margin-bottom:8px;line-height:1.5">固定費・特別費・積立を除いた、今月の変動費内訳です。</div>
     <div id="cat-graph"></div>
   </div>
   <div class="card">
@@ -844,6 +852,8 @@ footer{text-align:center;font-size:10px;color:var(--brm);padding:12px;line-heigh
    定数・デフォルト値
 ============================================================ */
 const STORAGE_KEY   = 'papapatoKakeiboZeroV1';
+/* 全画面共有の表示期間変数（saveTxで入力日付からセット） */
+let sharedPeriod=null;
 const DEF_EXP_CATS  = ['食費','日用品','外食','交通費','医療費','教育費','通信費','光熱費','家賃','交際費','特別費','固定費','サブスク','ネット購入','その他'];
 const DEF_INC_CATS  = ['給与','副収入','ボーナス','児童手当','贈与','その他'];
 const DEF_PAY_METHS = ['現金','クレジットカード','電子マネー','QR決済','銀行引き落とし'];
@@ -1275,7 +1285,15 @@ function pickWho(w){
   document.getElementById('who-lbl').textContent=w?`選択中：${w}`:'';
 }
 function initInput(){
-  document.getElementById('i-date').value=toDateStr(new Date());
+  // 日付の初期値：sharedPeriodがあり今日が期間外なら期間開始日、それ以外は今日
+  const _today=new Date();
+  let _defaultDate;
+  if(sharedPeriod && (_today < sharedPeriod.start || _today > sharedPeriod.end)){
+    _defaultDate=toDateStr(sharedPeriod.start);
+  } else {
+    _defaultDate=toDateStr(_today);
+  }
+  document.getElementById('i-date').value=_defaultDate;
   document.getElementById('i-amount').value='';
   document.getElementById('i-memo').value='';
   selCat=''; selPay=''; selWho='';
@@ -1317,10 +1335,46 @@ function saveTx(){
   // 保存成功時のみ画面遷移・トースト
   const ok=saveDB(db);
   if(ok){
+    // 入力した日付が属する家計簿期間を計算してセット
+    // ※ new Date("YYYY-MM-DD") はUTC午前0時になるためローカル日付で解析する
+    const _sd=db.settings.startDay||1;
+    const _ed=(db.settings.endDay!=null)?db.settings.endDay:0;
+    const _parts=date.split('-');
+    const _refDate=new Date(parseInt(_parts[0]),parseInt(_parts[1])-1,parseInt(_parts[2]));
+    const _p=getPeriod(_refDate,_sd,_ed);
+    // 全画面で同じ期間を表示するためすべての変数を同期
+    sharedPeriod=_p;
+    histPeriod=_p;
+    graphPeriod=_p;
+    revPeriod=_p;
     toast('保存しました♡');
     goPage('home');
   }
   // 失敗時はsaveDB内のalertが出るのでここでは何もしない（入力画面に留まる）
+}
+
+/* ============================================================
+   ホーム期間ナビ
+============================================================ */
+function moveHome(d){
+  const db=loadDB();
+  const sd=db.settings.startDay||1;
+  const ed=(db.settings.endDay!=null)?db.settings.endDay:0;
+  sharedPeriod=shiftPeriod(sharedPeriod||getPeriod(new Date(),sd,ed),d,sd,ed);
+  histPeriod=sharedPeriod;
+  graphPeriod=sharedPeriod;
+  revPeriod=sharedPeriod;
+  renderHome();
+}
+function goToday(){
+  const db=loadDB();
+  const sd=db.settings.startDay||1;
+  const ed=(db.settings.endDay!=null)?db.settings.endDay:0;
+  sharedPeriod=getPeriod(new Date(),sd,ed);
+  histPeriod=sharedPeriod;
+  graphPeriod=sharedPeriod;
+  revPeriod=sharedPeriod;
+  renderHome();
 }
 
 /* ============================================================
@@ -1330,12 +1384,25 @@ function renderHome(){
   const db=loadDB();
   const sd=db.settings.startDay||1;
   const ed=(db.settings.endDay!=null)?db.settings.endDay:0;
-  const p=getPeriod(new Date(),sd,ed);
-  // 期間表示
+  if(!sharedPeriod) sharedPeriod=getPeriod(new Date(),sd,ed);
+  const p=sharedPeriod;
+  // 期間ナビをJS生成（‹ 期間 › ／ 今月）
   const edLabel=ed===0?`${p.end.getMonth()+1}月末`:
     `${p.end.getMonth()+1}/${p.end.getDate()}`;
-  document.getElementById('home-period').textContent=
-    `${p.year}年${p.month}月（${p.start.getMonth()+1}/${p.start.getDate()}〜${edLabel}）`;
+  const periodTxt=`${p.year}年${p.month}月（${p.start.getMonth()+1}/${p.start.getDate()}〜${edLabel}）`;
+  const areaEl=document.getElementById('home-period-area');
+  if(areaEl){
+    areaEl.innerHTML=
+      '<div style="display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:nowrap">'
+      +'<button onclick="moveHome(-1)" style="background:none;border:none;font-size:28px;color:#b84060;cursor:pointer;padding:4px 10px;min-width:44px;min-height:44px;border-radius:50%;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,0,0,0)" aria-label="前の期間">‹</button>'
+      +'<span style="display:inline-flex;align-items:center;gap:5px;background:#fff;border:1.5px solid #f2c0cc;border-radius:22px;padding:6px 14px;font-size:13px;color:#b84060;font-weight:700;letter-spacing:.02em;box-shadow:0 1px 8px rgba(74,55,40,.06);white-space:nowrap">'
+      +'📅 '+periodTxt+'</span>'
+      +'<button onclick="moveHome(1)" style="background:none;border:none;font-size:28px;color:#b84060;cursor:pointer;padding:4px 10px;min-width:44px;min-height:44px;border-radius:50%;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,0,0,0)" aria-label="次の期間">›</button>'
+      +'</div>'
+      +'<div style="margin-top:6px">'
+      +'<button onclick="goToday()" style="background:#fff;border:1.5px solid #f2c0cc;border-radius:16px;padding:5px 18px;font-size:16px;color:#b84060;cursor:pointer;font-weight:700;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,0,0,0)">今月</button>'
+      +'</div>';
+  }
   const list=db.txs.filter(t=>inPeriod(t.date,p));
   const inc=sumType(list,'income');
   const exp=sumType(list,'expense');
@@ -1343,11 +1410,13 @@ function renderHome(){
   document.getElementById('h-inc').textContent=yen(inc);
   setAmt('h-exp',exp,'var(--rd)');
   setBalAmt('h-bal',bal);
-  // 固定費合計
-  document.getElementById('h-fix').textContent=yen(db.fixedItems.reduce((s,f)=>s+(f.amt||0),0));
-  // 固定積立合計（有効なものだけ） ＝ 貯金・投資合計
+  // 固定費合計・固定積立合計（黒字候補計算にも使うため早めに算出）
+  const fixTotal=db.fixedItems.reduce((s,f)=>s+(f.amt||0),0);
+  document.getElementById('h-fix').textContent=yen(fixTotal);
   const fixsavTotal=(db.fixedSavings||[]).filter(f=>f.active!==false).reduce((s,f)=>s+(f.amt||0),0);
   document.getElementById('h-fixsav').textContent=yen(fixsavTotal);
+  // 黒字候補 = 収入 − 支出 − 固定費 − 固定積立（特別費は支出に含まれるため二重引きなし）
+  const surplus=bal-fixTotal-fixsavTotal;
   // 貯蓄率 ＝ (固定積立 ＋ 黒字から貯金に反映した金額) ÷ 収入
   // 振り返りで「貯金に反映する」を保存した月だけ加算（二重加算なし）
   const revKey=`${p.year}-${p.month}`;
@@ -1375,7 +1444,6 @@ function renderHome(){
   const cardC=(db.fixedSavings||[]).filter(f=>f.active!==false&&(f.pay||'')==='クレジットカード').reduce((s,f)=>s+(f.amt||0),0);
   document.getElementById('h-card').textContent=yen(cardA+cardB+cardC);
   // 今月の生活費（変動費予算・使った変動費・生活費残り）
-  const fixTotal=db.fixedItems.reduce((s,f)=>s+(f.amt||0),0);
   const hdBudget=inc-fixTotal-fixsavTotal;
   // 変動費使用額：カテゴリーが「特別費」でない支出（固定積立は支出扱いしないので除外済み）
   const hdUsed=list.filter(t=>t.type==='expense'&&t.category!=='特別費').reduce((s,t)=>s+t.amount,0);
@@ -1419,28 +1487,49 @@ function renderHome(){
     const month=p.month||new Date().getMonth();
     kEl.textContent=kotobaList[month%kotobaList.length];
   } else if(kCard){ kCard.style.display='none'; }
-  renderWeekInfo(bal,p);
-  renderCloseArea(p, inc, exp, bal, db);
-  // 最近5件
-  const recent=[...db.txs].sort(descDate).slice(0,5);
+  // 黒字候補カード表示
+  renderHomeSurplus(surplus, inc);
+  renderWeekInfo(surplus,p);
+  renderCloseArea(p, inc, exp, bal, surplus, db);
+  // 最近5件（選択中の家計簿期間だけに絞り込む）
+  const recent=[...list].sort(descDate).slice(0,5);
   const el=document.getElementById('home-list');
   el.innerHTML=recent.length?recent.map(t=>txHTML(t,false)).join(''):'<div class="empty-msg">まだ記録がありません♡<br>「入力」から始めましょう</div>';
 }
-function renderWeekInfo(bal,p){
+function renderHomeSurplus(surplus, inc){
+  const card=document.getElementById('h-surplus-card');
+  if(!card) return;
+  if(inc===0){ card.style.display='none'; return; }
+  card.style.display='';
+  if(surplus>0){
+    card.style.background='#f0faf0';
+    card.style.border='1.5px solid #b2dfdb';
+    card.innerHTML=`<div style="font-size:12px;font-weight:700;color:#2e5046;margin-bottom:2px">💚 今月の黒字候補</div>`
+      +`<div style="font-size:22px;font-weight:700;color:var(--gn);margin-bottom:4px">${yen(surplus)}</div>`
+      +`<div style="font-size:10px;color:var(--brm);line-height:1.5">固定費・固定積立を引いた後の、今月の黒字候補です。<br>使い道は振り返り画面で決められます。</div>`;
+  } else {
+    card.style.background='#fff0f0';
+    card.style.border='1.5px solid #ffcdd2';
+    card.innerHTML=`<div style="font-size:12px;font-weight:700;color:#b71c1c;margin-bottom:2px">⚠️ 今月は生活費が予算を超えています</div>`
+      +`<div style="font-size:22px;font-weight:700;color:var(--rd);margin-bottom:4px">${(surplus<0?'-':'')+yen(Math.abs(surplus))}</div>`
+      +`<div style="font-size:10px;color:#b71c1c;line-height:1.5">固定費・固定積立を引くと赤字になっています。<br>来月は小さく見直していきましょう♡</div>`;
+  }
+}
+function renderWeekInfo(surplus,p){
   const today=new Date(); today.setHours(0,0,0,0);
   const end=new Date(p.end); end.setHours(23,59,59,999);
   const diffDays=Math.max(0,Math.ceil((end-today)/(1000*60*60*24)));
   const weeks=Math.max(1,Math.ceil(diffDays/7));
-  const perWeek=bal<=0?0:Math.floor(bal/weeks);
+  const perWeek=surplus<=0?0:Math.floor(surplus/weeks);
   const el=document.getElementById('week-info');
-  if(bal<=0){el.innerHTML='<span style="color:var(--rd)">現在赤字または収支0です。支出を見直しましょう♡</span>';return;}
+  if(surplus<=0){el.innerHTML='<span style="color:var(--rd)">現在赤字または収支0です。支出を見直しましょう♡</span>';return;}
   el.innerHTML=`残り <strong>${diffDays}日</strong>（約${weeks}週間）<br>1週間あたり目安：<strong style="color:var(--gn);font-size:16px">¥${perWeek.toLocaleString('ja-JP')}</strong>`;
 }
 
 /* ============================================================
    締め処理
 ============================================================ */
-function renderCloseArea(p, inc, exp, bal, db){
+function renderCloseArea(p, inc, exp, bal, surplus, db){
   const area=document.getElementById('home-close-area');
   if(!area) return;
   const today=new Date(); today.setHours(0,0,0,0);
@@ -1472,7 +1561,7 @@ function renderCloseArea(p, inc, exp, bal, db){
         <div class="close-sum-row"><span>固定費</span><span>${yen(cs.fixTotal||0)}</span></div>
         <div class="close-sum-row"><span>固定積立</span><span style="color:#7b1fa2">${yen(cs.fixsavTotal||0)}</span></div>
         <div class="close-sum-row"><span>特別費実績</span><span style="color:var(--pkd)">${yen(cs.speActual||0)}</span></div>
-        <div class="close-sum-row total ${(cs.bal||0)>=0?'plus':'minus'}"><span>${(cs.bal||0)>=0?'今月の黒字':'今月の赤字'}</span><span>${yen(Math.abs(cs.bal||0))}</span></div>
+        <div class="close-sum-row total ${(cs.bal||0)>=0?'plus':'minus'}"><span>${(cs.bal||0)>=0?'今月の黒字候補':'今月は赤字'}</span><span>${yen(Math.abs(cs.bal||0))}</span></div>
         ${savedAmt>0?`<div style="font-size:11px;color:#2e5046;background:#e8f5e9;border:1px solid #c8e6c9;border-radius:8px;padding:7px 10px;margin-top:8px">💰 貯蓄率に ${yen(savedAmt)} を反映済みです</div>`:''}
         <div style="text-align:right;margin-top:8px">
           <button class="redo-btn" onclick="redoClose('${key}')">↩ 締め処理をやり直す</button>
@@ -1487,7 +1576,9 @@ function renderCloseArea(p, inc, exp, bal, db){
     const hdUsed=list.filter(t=>t.type==='expense'&&t.category!=='特別費').reduce((s,t)=>s+t.amount,0);
     const hdBudget=inc-fixTotal-fixsavTotal;
     const hdRemain=hdBudget-hdUsed;
-    const isPlus=bal>0;
+    // 黒字候補 = 差額 − 固定費 − 固定積立（surplusはrenderHomeから受け取る）
+    const closeSurplus=surplus!==undefined?surplus:(bal-fixTotal-fixsavTotal);
+    const isPlus=closeSurplus>0;
     area.innerHTML=`
       <div class="card" style="border:1.5px solid var(--pkd)">
         <div class="card-t">📋 今月を締める</div>
@@ -1497,33 +1588,20 @@ function renderCloseArea(p, inc, exp, bal, db){
         <div class="close-sum-row"><span>固定費</span><span>${yen(fixTotal)}</span></div>
         <div class="close-sum-row"><span>固定積立</span><span style="color:#7b1fa2">${yen(fixsavTotal)}</span></div>
         <div class="close-sum-row"><span>特別費実績</span><span style="color:var(--pkd)">${yen(speActual)}</span></div>
-        <div class="close-sum-row"><span>生活費残り</span><span>${yen(hdRemain)}</span></div>
-        <div class="close-sum-row total ${isPlus?'plus':'minus'}"><span>${isPlus?'今月の黒字':'今月の赤字'}</span><span>${yen(Math.abs(bal))}</span></div>
+        <div class="close-sum-row"><span>差額（収入−支出）</span><span>${yen(bal)}</span></div>
+        <div class="close-sum-row total ${isPlus?'plus':'minus'}"><span>${isPlus?'今月の黒字候補':'今月は赤字'}</span><span>${(closeSurplus<0?'-':'')+yen(Math.abs(closeSurplus))}</span></div>
         ${isPlus?`
-        <div class="close-alloc-ttl">💚 この黒字をどうしますか？<br><span style="font-size:10px;font-weight:400;color:var(--brm)">合計が黒字を超えないよう入力してください（超えてもOK）</span></div>
-        <div class="close-alloc-row">
-          <label class="close-alloc-lbl">💰 貯金に反映する</label>
-          <input class="close-alloc-inp" id="cl-save" type="number" inputmode="numeric" min="0" placeholder="0" oninput="updateCloseRemain(${bal})">
+        <div style="background:#e8f5e9;border:1px solid #c8e6c9;border-radius:10px;padding:10px 12px;margin:10px 0;font-size:13px;color:#2e5046;line-height:1.8">
+          💚 今月の黒字候補は <strong>${yen(closeSurplus)}</strong> です。<br>
+          （固定費・固定積立を引いた後の金額）<br>
+          貯金・繰り越し・特別費の使い道は、<br>「<strong>振り返り</strong>」画面で決められます♡
         </div>
-        <div class="close-alloc-row">
-          <label class="close-alloc-lbl">🔄 来月へ繰り越す</label>
-          <input class="close-alloc-inp" id="cl-carry" type="number" inputmode="numeric" min="0" placeholder="0" oninput="updateCloseRemain(${bal})">
-        </div>
-        <div class="close-alloc-row">
-          <label class="close-alloc-lbl">📅 特別費の準備</label>
-          <input class="close-alloc-inp" id="cl-special" type="number" inputmode="numeric" min="0" placeholder="0" oninput="updateCloseRemain(${bal})">
-        </div>
-        <div class="close-alloc-row">
-          <label class="close-alloc-lbl">🏠 生活費の予備</label>
-          <input class="close-alloc-inp" id="cl-reserve" type="number" inputmode="numeric" min="0" placeholder="0" oninput="updateCloseRemain(${bal})">
-        </div>
-        <div id="cl-remain-msg" class="close-remain ok">入力した金額を確認して「締める」を押してください♡</div>
         `:`
         <div style="background:var(--rdl);border:1px solid #ffcdd2;border-radius:10px;padding:10px 12px;margin:10px 0;font-size:12px;color:#b71c1c;line-height:1.8">
-          今月は赤字でした。無理に貯金へ反映しなくて大丈夫です。<br>まずは記録できたことが一歩です♡
+          今月は生活費が予算を超えています。来月は小さく見直していきましょう♡
         </div>
         `}
-        <button class="close-btn" onclick="execClose('${key}',${bal},${inc},${exp},${fixTotal},${fixsavTotal},${speActual})">✅ 今月を締める</button>
+        <button class="close-btn" onclick="execClose('${key}',${closeSurplus},${inc},${exp},${fixTotal},${fixsavTotal},${speActual})">✅ 今月を締める</button>
       </div>`;
   }
 }
@@ -1588,12 +1666,12 @@ function redoClose(key){
 let histPeriod=null;
 function moveHist(d){
   const db=loadDB(); const sd=db.settings.startDay||1; const ed=(db.settings.endDay!=null)?db.settings.endDay:0;
-  histPeriod=shiftPeriod(histPeriod||getPeriod(new Date(),sd,ed),d,sd,ed);
+  histPeriod=shiftPeriod(histPeriod||sharedPeriod||getPeriod(new Date(),sd,ed),d,sd,ed);
   renderHistory();
 }
 function renderHistory(){
   const db=loadDB(); const sd=db.settings.startDay||1; const ed=(db.settings.endDay!=null)?db.settings.endDay:0;
-  if(!histPeriod) histPeriod=getPeriod(new Date(),sd,ed);
+  if(!histPeriod) histPeriod=sharedPeriod||getPeriod(new Date(),sd,ed);
   const p=histPeriod;
   document.getElementById('hist-lbl').textContent=`${p.year}年${p.month}月`;
   const list=db.txs.filter(t=>inPeriod(t.date,p)).sort(descDate);
@@ -1628,7 +1706,7 @@ function delTx(id){
 let graphPeriod=null;
 function moveGraph(d){
   const db=loadDB(); const sd=db.settings.startDay||1; const ed=(db.settings.endDay!=null)?db.settings.endDay:0;
-  graphPeriod=shiftPeriod(graphPeriod||getPeriod(new Date(),sd,ed),d,sd,ed);
+  graphPeriod=shiftPeriod(graphPeriod||sharedPeriod||getPeriod(new Date(),sd,ed),d,sd,ed);
   renderGraph();
 }
 // 円グラフ用カラーパレット（ピンク・ベージュ・ブラウン系）
@@ -1663,14 +1741,23 @@ function renderPie(containerId, entries){
 
 function renderGraph(){
   const db=loadDB(); const sd=db.settings.startDay||1; const ed=(db.settings.endDay!=null)?db.settings.endDay:0;
-  if(!graphPeriod) graphPeriod=getPeriod(new Date(),sd,ed);
+  if(!graphPeriod) graphPeriod=sharedPeriod||getPeriod(new Date(),sd,ed);
   const p=graphPeriod;
   document.getElementById('graph-lbl').textContent=`${p.year}年${p.month}月`;
   const list=db.txs.filter(t=>t.type==='expense'&&inPeriod(t.date,p));
-  // カテゴリー別支出（円グラフ）
+  // 変動費カテゴリー別支出（円グラフ）
+  // 固定費・特別費・積立・貯金・投資カテゴリーを除外して変動費のみ集計
+  const EXCLUDE_CATS=new Set(['固定費','特別費','積立','貯蓄','貯金','投資','NISA','iDeCo','iでCo','カード引き落とし']);
+  const varList=list.filter(t=>!EXCLUDE_CATS.has(t.category));
   const catMap={};
-  list.forEach(t=>{ catMap[t.category]=(catMap[t.category]||0)+t.amount; });
-  renderPie('cat-graph', Object.entries(catMap));
+  varList.forEach(t=>{ catMap[t.category]=(catMap[t.category]||0)+t.amount; });
+  const catEntries=Object.entries(catMap);
+  const catEl=document.getElementById('cat-graph');
+  if(catEntries.length===0){
+    catEl.innerHTML='<div class="empty-msg">この期間の変動費記録はまだありません</div>';
+  } else {
+    renderPie('cat-graph', catEntries);
+  }
   // 光熱費月別グラフ（直近6か月）
   let uHtml='';
   let hasUtil=false;
@@ -2084,13 +2171,13 @@ let revAutoSavings=0; // 自動貯金見込み（renderReviewで算出）
 
 function moveReview(d){
   const db=loadDB(); const sd=db.settings.startDay||1; const ed=(db.settings.endDay!=null)?db.settings.endDay:0;
-  revPeriod=shiftPeriod(revPeriod||getPeriod(new Date(),sd,ed),d,sd,ed);
+  revPeriod=shiftPeriod(revPeriod||sharedPeriod||getPeriod(new Date(),sd,ed),d,sd,ed);
   renderReview();
 }
 
 function renderReview(){
   const db=loadDB(); const sd=db.settings.startDay||1; const ed=(db.settings.endDay!=null)?db.settings.endDay:0;
-  if(!revPeriod) revPeriod=getPeriod(new Date(),sd,ed);
+  if(!revPeriod) revPeriod=sharedPeriod||getPeriod(new Date(),sd,ed);
   const key=`${revPeriod.year}-${revPeriod.month}`;
   document.getElementById('rev-lbl').textContent=`${revPeriod.year}年${revPeriod.month}月`;
   const r=db.reviews[key]||{};
@@ -2114,34 +2201,41 @@ function renderReview(){
   const exp=sumType(list,'expense')||0;
   const bal=inc-exp;
   const speActual=list.filter(t=>t.type==='expense'&&t.category==='特別費').reduce((s,t)=>s+(t.amount||0),0);
+  // 黒字候補 = 差額 − 固定費 − 固定積立（特別費は支出合計に含まれるため二重引きなし）
+  const revFixTotal=(db.fixedItems||[]).reduce((s,f)=>s+(f.amt||0),0);
+  const revFixsavTotal=(db.fixedSavings||[]).filter(f=>f.active!==false).reduce((s,f)=>s+(f.amt||0),0);
+  const revSurplus=bal-revFixTotal-revFixsavTotal;
 
-  // 自動貯金見込み = 差額（収入−支出）。収入0の場合は表示しない
-  revAutoSavings=bal;
+  // 自動貯金見込み = 黒字候補（固定費・固定積立引き後）
+  revAutoSavings=revSurplus;
 
   // 収支サマリー表示
-  renderRevSummary(inc,exp,speActual,bal);
+  renderRevSummary(inc,exp,speActual,bal,revFixTotal,revFixsavTotal,revSurplus);
 
   // 黒字の使い道カード（保存済み選択を復元）
-  renderSurplusSection(bal, r.surplusAction||'', r.surplusSavings||0);
+  renderSurplusSection(revSurplus, r.surplusAction||'', r.surplusSavings||0);
 
   // 貯金・投資合計と比較表示
   calcSavTotal();
 
   // アドバイス
-  renderAdvice(bal, inc, revPeriod.month, list);
+  renderAdvice(revSurplus, inc, revPeriod.month, list);
 }
 
 // 収支サマリー表示
-function renderRevSummary(inc, exp, speActual, bal){
+function renderRevSummary(inc, exp, speActual, bal, fixTotal, fixsavTotal, revSurplus){
   const el=document.getElementById('rev-summary');
   const db=loadDB();
   // 固定積立（有効なものだけ）
   const fixsavItems=(db.fixedSavings||[]).filter(f=>f.active!==false);
-  const fixsavTotal=fixsavItems.reduce((s,f)=>s+(f.amt||0),0);
-  // 生活費残り = 差額 − 固定積立
+  // 引数から渡されなかった場合の後方互換
+  if(fixsavTotal===undefined) fixsavTotal=fixsavItems.reduce((s,f)=>s+(f.amt||0),0);
+  if(fixTotal===undefined) fixTotal=(db.fixedItems||[]).reduce((s,f)=>s+(f.amt||0),0);
+  if(revSurplus===undefined) revSurplus=bal-fixTotal-fixsavTotal;
+  // 生活費残り = 差額 − 固定積立（表示用）
   const living=bal-fixsavTotal;
   const balColor=bal<0?'var(--rd)':bal>0?'var(--gn)':'var(--br)';
-  const livingColor=living<0?'var(--rd)':living>0?'var(--gn)':'var(--br)';
+  const surplusColor=revSurplus<0?'var(--rd)':revSurplus>0?'#2e6b35':'var(--br)';
   // 振り返りの貯蓄率も、黒字反映済みがあれば加算
   const revKey2=revPeriod?`${revPeriod.year}-${revPeriod.month}`:'';
   const revData2=(db.reviews&&revKey2&&db.reviews[revKey2])||{};
@@ -2149,7 +2243,8 @@ function renderRevSummary(inc, exp, speActual, bal){
   const totalSavRate2=fixsavTotal+surplusSavAmt2;
   const savRate=inc>0?Math.round(totalSavRate2/inc*100):null;
   const rateTxt=savRate!=null?savRate+'%':'—';
-  const autoSavTxt=inc===0?'—':(bal<=0?'¥0（赤字）':yen(bal));
+  const balTxt=inc===0?'—':(bal<=0?'¥0（赤字）':yen(bal));
+  const surplusTxt=inc===0?'—':(revSurplus<0?'赤字 −'+yen(Math.abs(revSurplus)):yen(revSurplus));
   // 固定積立内訳行
   const fixsavRows=fixsavItems.length
     ?fixsavItems.map(f=>`<div class="sum-row"><span class="sum-lbl" style="padding-left:12px;font-size:11px">${esc(f.name)}</span><span class="sum-val" style="color:#7b1fa2;font-size:12px">${yen(f.amt)}/月</span></div>`).join('')
@@ -2158,14 +2253,16 @@ function renderRevSummary(inc, exp, speActual, bal){
     <div class="sum-row"><span class="sum-lbl">収入</span><span class="sum-val" style="color:var(--gn)">${yen(inc)}</span></div>
     <div class="sum-row"><span class="sum-lbl">支出合計</span><span class="sum-val" style="color:var(--rd)">${yen(exp)}</span></div>
     <div class="sum-row"><span class="sum-lbl" style="padding-left:12px;font-size:11px">うち特別費実績</span><span class="sum-val" style="color:var(--pkd);font-size:12px">${yen(speActual)}</span></div>
-    <div class="sum-row highlight"><span class="sum-lbl">差額（自動貯金見込み）</span><span class="sum-val" style="color:${balColor};font-size:15px">${autoSavTxt}</span></div>
-    <div class="sum-row" style="margin-top:4px"><span class="sum-lbl" style="color:#7b1fa2;font-weight:700">固定積立合計</span><span class="sum-val" style="color:#7b1fa2">${yen(fixsavTotal)}</span></div>
+    <div class="sum-row"><span class="sum-lbl">差額（収入−支出）</span><span class="sum-val" style="color:${balColor}">${balTxt}</span></div>
+    <div class="sum-row" style="margin-top:4px"><span class="sum-lbl">固定費合計</span><span class="sum-val">${yen(fixTotal)}</span></div>
+    <div class="sum-row" style="margin-top:2px"><span class="sum-lbl" style="color:#7b1fa2;font-weight:700">固定積立合計</span><span class="sum-val" style="color:#7b1fa2">${yen(fixsavTotal)}</span></div>
     ${fixsavRows}
     <div class="sum-row"><span class="sum-lbl">貯蓄率（固定積立÷収入）</span><span class="sum-val" style="color:#7b1fa2">${rateTxt}</span></div>
-    <div class="sum-row highlight"><span class="sum-lbl">生活に使える残り</span><span class="sum-val" style="color:${livingColor};font-size:15px">${inc===0?'—':(living<0?'-':'')+yen(Math.abs(living))}</span></div>
+    <div class="sum-row highlight"><span class="sum-lbl" style="font-weight:700">💚 今月の黒字候補</span><span class="sum-val" style="color:${surplusColor};font-size:15px;font-weight:700">${surplusTxt}</span></div>
+    <div class="sum-row"><span class="sum-lbl" style="font-size:10px;color:var(--brm)">固定費・固定積立を引いた後の金額です</span></div>
   `;
   // やさしいコメント
-  renderFixedSavComment(fixsavTotal, living, inc);
+  renderFixedSavComment(fixsavTotal, revSurplus, inc);
 }
 
 // 固定積立に関するやさしいコメント
@@ -2205,20 +2302,20 @@ function renderSavingsCompare(savTotal){
   const el=document.getElementById('rev-sav-compare');
   if(savTotal===0&&revAutoSavings===0){el.innerHTML='';return;}
   if(revAutoSavings<0){
-    el.innerHTML=`<div class="compare-box minus">今月は赤字でしたが、無理に貯金しなくても大丈夫です♡<br>まず記録を続けることが一番の一歩です。</div>`;
+    el.innerHTML=`<div class="compare-box minus">今月は生活費が予算を超えています。無理に貯金しなくて大丈夫です♡<br>まず記録を続けることが一番の一歩です。</div>`;
     return;
   }
   const diff=revAutoSavings-savTotal;
   let cls, msg;
   if(diff<=0){
     cls='ok';
-    msg=`自動貯金見込みより多く積み立てできています♡<br>しっかり資産形成に回せています。`;
+    msg=`黒字候補より多く積み立てできています♡<br>しっかり資産形成に回せています。`;
   } else {
     cls='over';
     msg=`残り ${yen(diff)} は生活費の予備費や緊急用として残しておいても大丈夫ですよ。`;
   }
   el.innerHTML=`<div class="compare-box ${cls}">
-    自動貯金見込み：${yen(Math.max(revAutoSavings,0))}<br>
+    今月の黒字候補：${yen(Math.max(revAutoSavings,0))}<br>
     貯金・投資合計：${yen(savTotal)}<br>
     差額：${yen(Math.abs(diff))}<br>
     <br>${msg}
@@ -2309,20 +2406,20 @@ function renderAdvice(bal, inc, month, list){
       ?`残せたお金は、先取り貯金や特別費の準備（自動車税・旅行など）に回すと安心につながります。`
       :`少しでも残せたことは、立派な家計管理の成果です。`;
     cls='plus';
-    html=`今月は <strong>${yen(bal)}の黒字</strong> でした♡${topMsg}<br>しっかり家計を整えられています。<br>${savTip}<br>来月もできることを1つずつ続けていきましょう。`;
+    html=`固定費・固定積立を引いた今月の黒字候補は <strong>${yen(bal)}</strong> です♡${topMsg}<br>しっかり家計を整えられています。<br>${savTip}<br>来月もできることを1つずつ続けていきましょう。`;
   } else if(bal<0){
     cls='minus';
-    html=`今月は <strong>${yen(Math.abs(bal))}の赤字</strong> でした。${topMsg}<br>でも、記録できているだけで大きな一歩です。<br>まずは支出が多かった項目を1つだけ見直してみましょう。<br>来月は「週1回だけ家計を確認する」など、小さく整えていけば大丈夫です♡`;
+    html=`今月は生活費が予算を超えています。${topMsg}<br>でも、記録できているだけで大きな一歩です。<br>まずは支出が多かった項目を1つだけ見直してみましょう。<br>来月は小さく見直していけば大丈夫です♡`;
   } else {
     cls='zero';
-    html=`今月は収支がちょうど <strong>±0円</strong> でした。${topMsg}<br>使いすぎを防げています。<br>来月は少しだけ意識して、差額をプラスにできると安心です♡`;
+    html=`今月は固定費・固定積立を引くとちょうど <strong>±0円</strong> でした。${topMsg}<br>使いすぎを防げています。<br>来月は少しだけ意識して、黒字候補をプラスにできると安心です♡`;
   }
   el.innerHTML=`<div class="advice-box ${cls}">${html}</div>`;
 }
 
 function saveReview(){
   const db=loadDB(); const sd=db.settings.startDay||1; const ed=(db.settings.endDay!=null)?db.settings.endDay:0;
-  if(!revPeriod) revPeriod=getPeriod(new Date(),sd,ed);
+  if(!revPeriod) revPeriod=sharedPeriod||getPeriod(new Date(),sd,ed);
   const key=`${revPeriod.year}-${revPeriod.month}`;
 
   const cash=parseInt(document.getElementById('rev-sav-cash').value)||0;
@@ -2387,7 +2484,7 @@ function saveCfg(){
   const ok=saveDB(db);
   if(!ok) return; // 保存失敗時はトースト・画面更新しない
   // 履歴・グラフ・振り返りのキャッシュをリセット
-  histPeriod=null; graphPeriod=null; revPeriod=null;
+  sharedPeriod=null; histPeriod=null; graphPeriod=null; revPeriod=null;
   toast('期間設定を保存しました'); renderHome();
 }
 function renderSettings(){
